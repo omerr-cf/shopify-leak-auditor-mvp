@@ -1,0 +1,19 @@
+import { Zap } from "lucide-react";
+
+export default function Footer() {
+  return (
+    <footer className="px-4 py-10 sm:px-6">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-xs text-gray-600 sm:flex-row">
+        <div className="flex items-center gap-1.5">
+          <Zap className="h-3.5 w-3.5 fill-gray-600 text-gray-600" />
+          LeakAudit for Shopify
+        </div>
+        <p>
+          Read-only Shopify Admin API access only. We never touch your ad
+          spend or your money.
+        </p>
+        <p>&copy; {new Date().getFullYear()} LeakAudit. All rights reserved.</p>
+      </div>
+    </footer>
+  );
+}
