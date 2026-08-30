@@ -25,7 +25,7 @@ Visit `http://localhost:3000`.
 
 1. Copy `.env.local.example` to `.env.local`.
 2. Sign up at [resend.com](https://resend.com), verify a sending domain (you cannot send from a bare Gmail address — Resend requires a domain you control), and grab an API key.
-3. Set `RESEND_API_KEY`, and optionally override `LEAD_NOTIFICATION_EMAIL` (defaults to `0meram95@gmail.com` in code) and `LEAD_FROM_EMAIL`.
+3. Set `RESEND_API_KEY`, and optionally override `LEAD_NOTIFICATION_EMAIL` (defaults to `omerbussy1995@gmail.com` in code) and `LEAD_FROM_EMAIL`.
 4. Until you do this, `app/api/lead/route.ts` still returns success to the client and logs the full lead payload to the server console — so the waitlist modal works and captures leads from day one, you just won't get the email alert until Resend is wired up.
 5. Leads also get a best-effort backup written to `localStorage` (`leakaudit_waitlist`) client-side, purely as a redundant local record — the API response is the source of truth for the queue-position number shown to the merchant.
 

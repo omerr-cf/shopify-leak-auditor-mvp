@@ -6,3 +6,4 @@ out
 *.log
 .DS_Store
 _sync_update.zip
+.env

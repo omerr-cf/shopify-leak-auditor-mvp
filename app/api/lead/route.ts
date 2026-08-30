@@ -115,9 +115,9 @@ export async function POST(req: NextRequest) {
   // Slight randomization so every visitor doesn't see the identical number.
   const queuePosition = Math.floor(Math.random() * 37) + 8;
 
-  const notifyEmail = process.env.LEAD_NOTIFICATION_EMAIL || "0meram95@gmail.com";
+  const notifyEmail = process.env.LEAD_NOTIFICATION_EMAIL || "omerbussy1995@gmail.com";
   const fromEmail =
-    process.env.LEAD_FROM_EMAIL || "LeakAudit Leads <leads@yourdomain.com>";
+    process.env.LEAD_FROM_EMAIL || "LeakAudit Leads <onboarding@resend.dev>";
   const apiKey = process.env.RESEND_API_KEY;
 
   const leadRecord = { storeUrl, email, revenue, submittedAt, referrer, ip };
