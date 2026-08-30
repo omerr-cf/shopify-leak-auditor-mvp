@@ -1,8 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Zap, ShieldCheck, Store } from "lucide-react";
+import { ShieldCheck, Store } from "lucide-react";
 import { useModal } from "./ModalProvider";
+import Logomark from "./Logomark";
+import IconTile from "./IconTile";
 
 export default function Header() {
   const { openModal } = useModal();
@@ -15,24 +17,23 @@ export default function Header() {
       className="sticky top-0 z-40 border-b border-line/80 bg-ink/80 backdrop-blur-md"
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
-        <div className="flex items-center gap-2">
-          <Zap className="h-5 w-5 fill-emerald-500 text-emerald-500" />
-          <span className="text-sm font-bold tracking-tight text-white sm:text-base">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-emerald-500/25 bg-emerald-500/10 text-emerald-400">
+            <Logomark className="h-4.5 w-4.5" />
+          </span>
+          <span className="font-display text-[15px] font-medium italic tracking-tight text-white sm:text-base">
             LeakAudit <span className="text-gray-500">for Shopify</span>
           </span>
         </div>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Badge icon={<Store className="h-3 w-3" />} label="Shopify App Store Partner" />
-          <Badge
-            icon={<ShieldCheck className="h-3 w-3" />}
-            label="100% Read-Only & Secure"
-          />
+          <Badge icon={<Store />} label="Shopify App Store Partner" />
+          <Badge icon={<ShieldCheck />} label="100% Read-Only & Secure" />
         </div>
 
         <button
           onClick={openModal}
-          className="rounded-lg bg-emerald-500 px-3.5 py-2 text-xs font-semibold text-ink transition hover:bg-emerald-400 sm:px-4 sm:text-sm"
+          className="rounded-lg bg-gradient-to-b from-emerald-400 to-emerald-500 px-3.5 py-2 text-xs font-semibold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:from-emerald-300 hover:to-emerald-400 sm:px-4 sm:text-sm"
         >
           Check My Store (Free)
         </button>
@@ -41,10 +42,10 @@ export default function Header() {
   );
 }
 
-function Badge({ icon, label }: { icon: React.ReactNode; label: string }) {
+function Badge({ icon, label }: { icon: React.ReactElement; label: string }) {
   return (
-    <div className="flex items-center gap-1.5 rounded-full border border-line bg-panel px-3 py-1 text-[11px] font-medium text-gray-400">
-      {icon}
+    <div className="flex items-center gap-2 rounded-full border border-line bg-panel py-1 pl-1 pr-3 text-[11px] font-medium text-gray-400">
+      <IconTile icon={icon} tone="neutral" size="sm" className="!h-5 !w-5" />
       {label}
     </div>
   );

@@ -1,8 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Zap, ShieldCheck, CreditCard, MousePointerClick } from "lucide-react";
+import { CreditCard, ShieldCheck, MousePointerClick } from "lucide-react";
 import { useModal } from "./ModalProvider";
+import RadarScan from "./RadarScan";
+import LottieSlot from "./LottieSlot";
 
 export default function Hero() {
   const { openModal } = useModal();
@@ -13,7 +15,7 @@ export default function Hero() {
       <div className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[900px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[120px]" />
       <div className="pointer-events-none absolute right-0 top-24 h-[380px] w-[560px] rounded-full bg-cyan-500/[0.06] blur-[110px]" />
 
-      <div className="relative mx-auto max-w-4xl px-4 pb-20 pt-16 text-center sm:px-6 sm:pb-28 sm:pt-24">
+      <div className="relative mx-auto max-w-4xl px-4 pb-16 pt-16 text-center sm:px-6 sm:pb-20 sm:pt-24">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -21,20 +23,22 @@ export default function Hero() {
           className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-1.5 text-xs font-medium text-red-400"
         >
           <span className="h-1.5 w-1.5 animate-pulse-slow rounded-full bg-red-500" />
-          The Average $50K/mo Shopify Store Loses $847/mo to Silent Leaks
+          The Average $50K/mo Shopify Store Loses{" "}
+          <span className="font-mono font-medium">$847/mo</span> to Silent
+          Leaks
         </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-balance text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-6xl"
+          className="text-balance font-display text-4xl font-medium leading-[1.08] tracking-tight text-white sm:text-6xl"
         >
           Find the{" "}
-          <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text text-transparent">
-            $400–$1,200/Month
-          </span>{" "}
-          Your Shopify Store Is Leaking. In 60 Seconds.
+          <span className="bg-gradient-to-r from-emerald-400 to-emerald-300 bg-clip-text font-mono italic text-transparent">
+            $400–$1,200
+          </span>
+          /Month Your Shopify Store Is Leaking. In 60 Seconds.
         </motion.h1>
 
         <motion.p
@@ -58,26 +62,50 @@ export default function Hero() {
             onClick={openModal}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
-            className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-emerald-500 px-7 py-4 text-base font-bold text-ink shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400 animate-glow"
+            className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-7 py-4 text-base font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_30px_-10px_rgba(16,185,129,0.45)] transition hover:from-emerald-300 hover:to-emerald-400"
           >
-            <Zap className="h-5 w-5 fill-ink" />
+            <CreditCard className="h-5 w-5" strokeWidth={2} />
             Run 60-Second Store Audit — Free
           </motion.button>
 
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-xs text-gray-500">
             <span className="flex items-center gap-1.5">
-              <CreditCard className="h-3.5 w-3.5" />
+              <ShieldCheck className="h-3.5 w-3.5" strokeWidth={1.75} />
               Zero credit card required
             </span>
             <span className="flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5" />
+              <ShieldCheck className="h-3.5 w-3.5" strokeWidth={1.75} />
               Read-only access
             </span>
             <span className="flex items-center gap-1.5">
-              <MousePointerClick className="h-3.5 w-3.5" />
+              <MousePointerClick className="h-3.5 w-3.5" strokeWidth={1.75} />
               1-click uninstall
             </span>
           </div>
+        </motion.div>
+
+        {/*
+          LOTTIE SLOT #1 — "hero-scan"
+          The most prominent slot on the page. Once you have a Lottie JSON
+          (a coin/leak/money-scan animation reads best here), swap the
+          fallback below for:
+            <LottieSlot
+              animationData={heroScanAnimation}
+              fallback={<RadarScan label="Scanning your store's revenue..." />}
+              className="h-40 w-40"
+            />
+          Until then it renders the pure-CSS RadarScan fallback so the slot
+          never looks empty.
+        */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="glass-panel mx-auto mt-12 flex w-fit items-center gap-3 rounded-full px-5 py-3"
+        >
+          <LottieSlot
+            fallback={<RadarScan label="Scanning your store's revenue..." />}
+          />
         </motion.div>
       </div>
     </section>

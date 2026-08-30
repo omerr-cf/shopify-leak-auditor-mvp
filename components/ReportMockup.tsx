@@ -11,10 +11,12 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useModal } from "./ModalProvider";
+import IconTile from "./IconTile";
+import LottieSlot from "./LottieSlot";
 
 const LEAK_CARDS = [
   {
-    icon: <CreditCard className="h-5 w-5" />,
+    icon: <CreditCard />,
     title: "Non-Native Currency Gateway Markup",
     detail:
       "23% of orders settle in EUR/GBP through a gateway route charging a 1.9% FX markup above interbank rate.",
@@ -22,7 +24,7 @@ const LEAK_CARDS = [
     fix: "Switch FX routing",
   },
   {
-    icon: <PackageX className="h-5 w-5" />,
+    icon: <PackageX />,
     title: "2 SKUs Selling at Negative Margin After Shipping",
     detail:
       '"Weighted Canvas Tote — Large" and "Ceramic Mug Bundle" cost more to fulfill than they sell for once shipping is included.',
@@ -30,7 +32,7 @@ const LEAK_CARDS = [
     fix: "Reprice 2 SKUs",
   },
   {
-    icon: <Gauge className="h-5 w-5" />,
+    icon: <Gauge />,
     title: "3 Leftover Theme Scripts Delaying Mobile Load by 1.4s",
     detail:
       "Scripts from 3 uninstalled apps are still injected in theme.liquid, slowing mobile checkout and depressing conversion.",
@@ -38,7 +40,7 @@ const LEAK_CARDS = [
     fix: "Remove 3 scripts",
   },
   {
-    icon: <RotateCcw className="h-5 w-5" />,
+    icon: <RotateCcw />,
     title: "1 Variant with 22% Return Rate",
     detail:
       '"Slim Fit Denim — 32W" returns at 4.8x your store average, driving silent refund + restocking drag.',
@@ -57,7 +59,7 @@ export default function ReportMockup() {
           <span className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
             What you actually get
           </span>
-          <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
+          <h2 className="mt-3 font-display text-3xl font-medium text-white sm:text-4xl">
             One Page. Four Leaks. Zero Guesswork.
           </h2>
           <p className="mt-3 text-gray-400">
@@ -76,7 +78,7 @@ export default function ReportMockup() {
           {/* Polaris-style top bar */}
           <div className="flex items-center justify-between border-b border-line bg-[#111827] px-5 py-3.5">
             <div className="flex items-center gap-2 text-sm font-medium text-gray-300">
-              <Store className="h-4 w-4 text-gray-500" />
+              <Store className="h-4 w-4 text-gray-500" strokeWidth={1.75} />
               Store: <span className="text-white">UrbanAesthetic.myshopify.com</span>
               <span className="text-gray-600">— Cash Leak Audit</span>
             </div>
@@ -86,16 +88,28 @@ export default function ReportMockup() {
           </div>
 
           {/* Red total banner */}
-          <div className="flex flex-col items-center gap-1 border-b border-red-500/20 bg-red-500/10 px-6 py-6 text-center">
+          <div className="flex flex-col items-center gap-2 border-b border-red-500/20 bg-red-500/10 px-6 py-6 text-center">
             <span className="text-xs font-semibold uppercase tracking-wide text-red-400">
               Total Identified Leaks
             </span>
-            <span className="text-4xl font-extrabold text-red-400 sm:text-5xl">
-              $847.00{" "}
-              <span className="text-lg font-semibold text-red-400/70">
-                / month
+            <div className="flex items-center gap-3">
+              {/*
+                LOTTIE SLOT #4 — "report-leak-icon"
+                Small accent next to the headline total — a coin-drip or
+                downward-then-caught animation fits well here. Swap for:
+                  <LottieSlot animationData={leakIconAnimation} fallback={null} className="h-8 w-8" />
+                fallback is intentionally null here (nothing renders until
+                you add a real animation — the number alone carries this
+                moment fine on its own).
+              */}
+              <LottieSlot fallback={null} />
+              <span className="font-mono text-4xl font-bold text-red-400 sm:text-5xl">
+                $847.00{" "}
+                <span className="text-lg font-medium text-red-400/70">
+                  / month
+                </span>
               </span>
-            </span>
+            </div>
           </div>
 
           {/* Leak cards */}
@@ -107,9 +121,7 @@ export default function ReportMockup() {
               >
                 <div className="mb-2.5 flex items-start justify-between gap-3">
                   <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
-                      {card.icon}
-                    </span>
+                    <IconTile icon={card.icon} tone="amber" size="md" className="mt-0.5" />
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                         Leak {i + 1}
@@ -124,12 +136,12 @@ export default function ReportMockup() {
                   {card.detail}
                 </p>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-amber-400">
+                  <span className="font-mono text-sm font-bold text-amber-400">
                     {card.amount}
                   </span>
                   <button className="flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-400 transition hover:bg-emerald-500/20">
                     {card.fix}
-                    <ArrowRight className="h-3 w-3" />
+                    <ArrowRight className="h-3 w-3" strokeWidth={1.75} />
                   </button>
                 </div>
               </div>
@@ -139,14 +151,14 @@ export default function ReportMockup() {
           {/* Green footer */}
           <div className="flex flex-col items-center gap-3 border-t border-emerald-500/20 bg-emerald-500/10 px-6 py-6 text-center sm:flex-row sm:justify-between sm:text-left">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-              <span className="text-base font-bold text-emerald-400">
+              <CheckCircle2 className="h-5 w-5 text-emerald-400" strokeWidth={1.75} />
+              <span className="font-mono text-base font-bold text-emerald-400">
                 Money You Can Recover Today: $847.00/mo
               </span>
             </div>
             <button
               onClick={openModal}
-              className="rounded-lg bg-emerald-500 px-5 py-2.5 text-sm font-bold text-ink transition hover:bg-emerald-400"
+              className="rounded-lg bg-gradient-to-b from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:from-emerald-300 hover:to-emerald-400"
             >
               Get My Real Report →
             </button>

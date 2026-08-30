@@ -47,7 +47,7 @@ export default function Comparison() {
           <span className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
             No spin, just the truth
           </span>
-          <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
+          <h2 className="mt-3 font-display text-3xl font-medium text-white sm:text-4xl">
             LeakAudit vs. Legacy Profit Apps
           </h2>
           <p className="mt-3 text-gray-400">
@@ -85,11 +85,11 @@ export default function Comparison() {
                 {row.label}
               </div>
               <div className="flex items-center justify-center gap-2 border-x border-line bg-emerald-500/[0.04] p-4 text-center text-xs font-semibold text-white sm:text-sm">
-                <Check className="h-4 w-4 shrink-0 text-emerald-400" />
+                <Check className="h-4 w-4 shrink-0 text-emerald-400" strokeWidth={2} />
                 {row.us}
               </div>
               <div className="flex items-center justify-center gap-2 p-4 text-center text-xs text-gray-500 sm:text-sm">
-                <X className="h-4 w-4 shrink-0 text-red-500/70" />
+                <X className="h-4 w-4 shrink-0 text-red-500/70" strokeWidth={2} />
                 {row.them}
               </div>
             </div>
@@ -99,7 +99,7 @@ export default function Comparison() {
         <div className="mt-10 text-center">
           <button
             onClick={openModal}
-            className="rounded-xl bg-emerald-500 px-7 py-3.5 text-sm font-bold text-ink transition hover:bg-emerald-400"
+            className="rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-7 py-3.5 text-sm font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:from-emerald-300 hover:to-emerald-400"
           >
             See the Difference on My Store →
           </button>

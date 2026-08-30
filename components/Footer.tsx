@@ -1,11 +1,11 @@
-import { Zap } from "lucide-react";
+import Logomark from "./Logomark";
 
 export default function Footer() {
   return (
     <footer className="px-4 py-10 sm:px-6">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-xs text-gray-600 sm:flex-row">
         <div className="flex items-center gap-1.5">
-          <Zap className="h-3.5 w-3.5 fill-gray-600 text-gray-600" />
+          <Logomark className="h-3.5 w-3.5 text-gray-600" />
           LeakAudit for Shopify
         </div>
         <p>

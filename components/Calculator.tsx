@@ -7,6 +7,8 @@ import { estimateLeaks, formatUSD } from "@/lib/utils";
 import { useModal } from "./ModalProvider";
 import AnimatedNumber from "./AnimatedNumber";
 import RadarScan from "./RadarScan";
+import LottieSlot from "./LottieSlot";
+import IconTile from "./IconTile";
 
 export default function Calculator() {
   const { openModal } = useModal();
@@ -21,26 +23,26 @@ export default function Calculator() {
 
   const rows = [
     {
-      icon: <CreditCard className="h-4 w-4" />,
-      emoji: "💳",
+      icon: <CreditCard />,
+      tone: "emerald" as const,
       label: "Hidden FX & Gateway Markup",
       value: leaks.fxLeak,
     },
     {
-      icon: <Package className="h-4 w-4" />,
-      emoji: "📦",
+      icon: <Package />,
+      tone: "amber" as const,
       label: "Negative-Margin / Shipping Variances",
       value: leaks.marginShippingLeak,
     },
     {
-      icon: <Ghost className="h-4 w-4" />,
-      emoji: "👻",
+      icon: <Ghost />,
+      tone: "cyan" as const,
       label: "Abandoned App Scripts & Bloat",
       value: leaks.bloatLeak,
     },
     {
-      icon: <RotateCcw className="h-4 w-4" />,
-      emoji: "🔄",
+      icon: <RotateCcw />,
+      tone: "red" as const,
       label: "Refund Drift & Chargeback Slippage",
       value: leaks.refundLeak,
     },
@@ -56,7 +58,7 @@ export default function Calculator() {
           <span className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
             Try it yourself
           </span>
-          <h2 className="mt-3 text-3xl font-bold text-white sm:text-4xl">
+          <h2 className="mt-3 font-display text-3xl font-medium text-white sm:text-4xl">
             What Is Your Store Actually Leaking?
           </h2>
           <p className="mt-3 text-gray-400">
@@ -75,13 +77,21 @@ export default function Calculator() {
             <span className="font-semibold text-emerald-400">
               Live Engine Active
             </span>{" "}
-            • 19 Shopify stores scanned in the last 24 hours ($1.4M GMV
+            •{" "}
+            <span className="font-mono">19</span> Shopify stores scanned in
+            the last 24 hours (<span className="font-mono">$1.4M</span> GMV
             analyzed)
           </span>
         </div>
 
+        {/*
+          LOTTIE SLOT #2 — "calc-radar"
+          Small, frequent, low-key — a looping scan/pulse animation fits
+          best here. Swap the fallback prop for:
+            <LottieSlot animationData={calcRadarAnimation} fallback={<RadarScan />} />
+        */}
         <div className="mb-8 flex justify-center">
-          <RadarScan />
+          <LottieSlot fallback={<RadarScan />} />
         </div>
 
         <div className="glass-panel grid gap-8 rounded-2xl p-6 shadow-xl shadow-black/30 sm:p-8 lg:grid-cols-2 lg:gap-12">
@@ -122,14 +132,14 @@ export default function Calculator() {
               Estimated Monthly Cash Leak
             </p>
             <div className="my-3 text-center">
-              <span className="bg-gradient-to-b from-red-400 to-amber-400 bg-clip-text text-5xl font-extrabold text-transparent drop-shadow-[0_0_30px_rgba(239,68,68,0.25)] sm:text-6xl">
+              <span className="bg-gradient-to-b from-red-400 to-amber-400 bg-clip-text font-mono text-5xl font-bold text-transparent drop-shadow-[0_0_30px_rgba(239,68,68,0.25)] sm:text-6xl">
                 ~$
                 <AnimatedNumber
                   value={leaks.total}
                   formatter={(n) => Math.round(n).toLocaleString("en-US")}
                 />
               </span>
-              <span className="ml-1 text-lg font-semibold text-gray-500">
+              <span className="ml-1 font-mono text-lg font-medium text-gray-500">
                 /mo
               </span>
             </div>
@@ -138,13 +148,13 @@ export default function Calculator() {
               {rows.map((row) => (
                 <div
                   key={row.label}
-                  className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5"
+                  className="flex items-center justify-between gap-3 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5"
                 >
-                  <span className="flex items-center gap-2 text-sm text-gray-300">
-                    <span aria-hidden>{row.emoji}</span>
+                  <span className="flex items-center gap-2.5 text-sm text-gray-300">
+                    <IconTile icon={row.icon} tone={row.tone} size="sm" />
                     {row.label}
                   </span>
-                  <span className="text-sm font-semibold text-white">
+                  <span className="font-mono text-sm font-semibold text-white">
                     ~<AnimatedNumber
                       value={row.value}
                       formatter={(n) => Math.round(n).toLocaleString("en-US")}
@@ -159,7 +169,7 @@ export default function Calculator() {
               onClick={openModal}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="mt-6 w-full rounded-lg bg-emerald-500 py-3.5 text-sm font-bold text-ink transition hover:bg-emerald-400"
+              className="mt-6 w-full rounded-lg bg-gradient-to-b from-emerald-400 to-emerald-500 py-3.5 text-sm font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:from-emerald-300 hover:to-emerald-400"
             >
               Claim My Full Store Audit →
             </motion.button>
@@ -193,7 +203,7 @@ function SliderInput({
     <div>
       <div className="mb-2.5 flex items-center justify-between">
         <label className="text-sm font-medium text-gray-300">{label}</label>
-        <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 text-sm font-bold text-emerald-400">
+        <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 font-mono text-sm font-bold text-emerald-400">
           {display}
         </span>
       </div>

@@ -133,6 +133,20 @@ export default function WaitlistModal() {
                   animate={{ opacity: 1, scale: 1 }}
                   className="py-4 text-center"
                 >
+                  {/*
+                    LOTTIE SLOT #3 — "success-celebration"
+                    The highest-emotion moment on the site (someone just
+                    converted). A confetti burst or checkmark-morph reads
+                    best here. Swap the fallback prop for:
+                      <LottieSlot
+                        animationData={successAnimation}
+                        fallback={<>...current pulse+icon markup...</>}
+                        className="mx-auto mb-4 h-16 w-16"
+                        loop={false}
+                      />
+                    Until then, the pure-CSS radiating pulse + PartyPopper
+                    icon below carries the moment.
+                  */}
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
@@ -151,12 +165,12 @@ export default function WaitlistModal() {
                       animate={{ scale: 2.1, opacity: 0 }}
                       transition={{ duration: 1.1, repeat: 2, ease: "easeOut" }}
                     />
-                    <PartyPopper className="h-7 w-7" />
+                    <PartyPopper className="h-7 w-7" strokeWidth={1.75} />
                   </motion.div>
-                  <h3 className="text-xl font-bold text-white">
+                  <h3 className="font-display text-xl font-medium text-white">
                     You&apos;re in Wave 1!
                   </h3>
-                  <p className="mt-1 text-sm font-medium text-emerald-400">
+                  <p className="mt-1 font-mono text-sm font-medium text-emerald-400">
                     Queue Position #{queuePosition ?? "—"}
                   </p>
                   <p className="mx-auto mt-3 max-w-sm text-sm text-gray-400">
@@ -185,7 +199,7 @@ export default function WaitlistModal() {
                       Wave 1 — Limited to 50 stores
                     </span>
                   </div>
-                  <h3 className="text-xl font-bold text-white sm:text-2xl">
+                  <h3 className="font-display text-xl font-medium text-white sm:text-2xl">
                     Connect Your Shopify Store for Wave&nbsp;1 Access
                   </h3>
                   <p className="mt-2 text-sm text-gray-400">
@@ -262,7 +276,7 @@ export default function WaitlistModal() {
                     <button
                       type="submit"
                       disabled={status === "submitting"}
-                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 py-3 text-sm font-semibold text-[#07090E] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
+                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-b from-emerald-400 to-emerald-500 py-3 text-sm font-semibold text-[#07090E] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:from-emerald-300 hover:to-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       {status === "submitting" ? (
                         <>
