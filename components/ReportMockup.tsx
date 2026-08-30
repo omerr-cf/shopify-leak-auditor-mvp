@@ -71,7 +71,7 @@ export default function ReportMockup() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
-          className="overflow-hidden rounded-2xl border border-line bg-panel shadow-2xl shadow-black/30"
+          className="glass-panel overflow-hidden rounded-2xl shadow-2xl shadow-black/40"
         >
           {/* Polaris-style top bar */}
           <div className="flex items-center justify-between border-b border-line bg-[#111827] px-5 py-3.5">

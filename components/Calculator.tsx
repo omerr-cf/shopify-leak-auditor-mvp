@@ -6,6 +6,7 @@ import { CreditCard, Package, Ghost, RotateCcw } from "lucide-react";
 import { estimateLeaks, formatUSD } from "@/lib/utils";
 import { useModal } from "./ModalProvider";
 import AnimatedNumber from "./AnimatedNumber";
+import RadarScan from "./RadarScan";
 
 export default function Calculator() {
   const { openModal } = useModal();
@@ -46,9 +47,12 @@ export default function Calculator() {
   ];
 
   return (
-    <section id="calculator" className="border-b border-line/60 bg-panel/40">
-      <div className="mx-auto max-w-5xl px-4 py-20 sm:px-6">
-        <div className="mx-auto mb-12 max-w-2xl text-center">
+    <section
+      id="calculator"
+      className="mesh-bg relative border-b border-line/60"
+    >
+      <div className="relative mx-auto max-w-5xl px-4 py-20 sm:px-6">
+        <div className="mx-auto mb-6 max-w-2xl text-center">
           <span className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
             Try it yourself
           </span>
@@ -61,7 +65,26 @@ export default function Calculator() {
           </p>
         </div>
 
-        <div className="grid gap-8 rounded-2xl border border-line bg-panel p-6 shadow-xl shadow-black/20 sm:p-8 lg:grid-cols-2 lg:gap-12">
+        {/* Live activity ticker (social proof) */}
+        <div className="mx-auto mb-4 flex w-fit items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.03] px-4 py-1.5 text-xs text-gray-400 backdrop-blur-md">
+          <span className="relative flex h-2 w-2 shrink-0">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+          </span>
+          <span>
+            <span className="font-semibold text-emerald-400">
+              Live Engine Active
+            </span>{" "}
+            • 19 Shopify stores scanned in the last 24 hours ($1.4M GMV
+            analyzed)
+          </span>
+        </div>
+
+        <div className="mb-8 flex justify-center">
+          <RadarScan />
+        </div>
+
+        <div className="glass-panel grid gap-8 rounded-2xl p-6 shadow-xl shadow-black/30 sm:p-8 lg:grid-cols-2 lg:gap-12">
           {/* Inputs */}
           <div className="flex flex-col justify-center gap-8">
             <SliderInput
@@ -94,7 +117,7 @@ export default function Calculator() {
           </div>
 
           {/* Output */}
-          <div className="flex flex-col justify-center rounded-xl border border-line bg-ink p-6 sm:p-8">
+          <div className="glass-panel flex flex-col justify-center rounded-xl p-6 sm:p-8">
             <p className="text-center text-xs font-medium uppercase tracking-wide text-gray-500">
               Estimated Monthly Cash Leak
             </p>
@@ -115,7 +138,7 @@ export default function Calculator() {
               {rows.map((row) => (
                 <div
                   key={row.label}
-                  className="flex items-center justify-between rounded-lg border border-line/70 bg-panel px-3.5 py-2.5"
+                  className="flex items-center justify-between rounded-lg border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5"
                 >
                   <span className="flex items-center gap-2 text-sm text-gray-300">
                     <span aria-hidden>{row.emoji}</span>

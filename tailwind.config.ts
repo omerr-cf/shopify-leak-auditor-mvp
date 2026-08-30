@@ -8,12 +8,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#0B0F17",
+        ink: "#07090E",
         panel: "#0F141D",
         line: "#1F2937",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
       },
       keyframes: {
         "pulse-slow": {

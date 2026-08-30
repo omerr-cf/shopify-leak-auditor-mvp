@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, PartyPopper, ShieldCheck, Loader2 } from "lucide-react";
+import { X, PartyPopper, ShieldCheck, Loader2, AlertTriangle } from "lucide-react";
 import { useModal } from "./ModalProvider";
 
 const REVENUE_BANDS = [
@@ -21,7 +21,8 @@ export default function WaitlistModal() {
   const [storeUrl, setStoreUrl] = useState("");
   const [email, setEmail] = useState("");
   const [revenue, setRevenue] = useState(REVENUE_BANDS[1]);
-  const [queuePosition] = useState(() => Math.floor(Math.random() * 37) + 8);
+  const [queuePosition, setQueuePosition] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   function resetAndClose() {
     closeModal();
@@ -31,7 +32,30 @@ export default function WaitlistModal() {
       setStoreUrl("");
       setEmail("");
       setRevenue(REVENUE_BANDS[1]);
+      setQueuePosition(null);
+      setErrorMessage(null);
     }, 300);
+  }
+
+  function backupToLocalStorage() {
+    // Best-effort local record so you still have something even if the
+    // API call fails downstream or Resend silently drops the email.
+    // Never let this block the success state — private browsing / quota
+    // errors are common and irrelevant to whether the lead was captured.
+    try {
+      const existing = JSON.parse(
+        localStorage.getItem("leakaudit_waitlist") || "[]"
+      );
+      localStorage.setItem(
+        "leakaudit_waitlist",
+        JSON.stringify([
+          ...existing,
+          { storeUrl, email, revenue, submittedAt: new Date().toISOString() },
+        ])
+      );
+    } catch {
+      // ignore
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -39,28 +63,34 @@ export default function WaitlistModal() {
     if (!storeUrl || !email) return;
 
     setStatus("submitting");
+    setErrorMessage(null);
 
-    // --- Fake-door submission ---
-    // Swap this block for a real API route (e.g. app/api/waitlist/route.ts
-    // writing to Supabase) once you're past the smoke test stage.
     try {
-      const lead = {
-        storeUrl,
-        email,
-        revenue,
-        submittedAt: new Date().toISOString(),
-      };
-      const existing = JSON.parse(
-        localStorage.getItem("leakaudit_waitlist") || "[]"
+      const res = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ storeUrl, email, revenue }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || `Request failed (${res.status})`);
+      }
+
+      setQueuePosition(
+        typeof data.queuePosition === "number"
+          ? data.queuePosition
+          : Math.floor(Math.random() * 37) + 8
       );
-      localStorage.setItem(
-        "leakaudit_waitlist",
-        JSON.stringify([...existing, lead])
-      );
-      await new Promise((resolve) => setTimeout(resolve, 900));
+      backupToLocalStorage();
       setStatus("success");
     } catch (err) {
+      console.error("[WaitlistModal] submission failed:", err);
       setStatus("error");
+      setErrorMessage(
+        "Something glitched on our end. Your spot isn't locked in yet — try again in a moment."
+      );
     }
   }
 
@@ -81,7 +111,7 @@ export default function WaitlistModal() {
 
           {/* Modal card */}
           <motion.div
-            className="relative w-full max-w-md rounded-2xl border border-line bg-panel p-6 shadow-2xl shadow-black/50 sm:p-8"
+            className="relative w-full max-w-md rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 shadow-2xl shadow-black/50 backdrop-blur-md sm:p-8"
             initial={{ opacity: 0, y: 24, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.97 }}
@@ -96,7 +126,53 @@ export default function WaitlistModal() {
             </button>
 
             <AnimatePresence mode="wait">
-              {status !== "success" ? (
+              {status === "success" ? (
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="py-4 text-center"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 260,
+                      damping: 15,
+                      delay: 0.1,
+                    }}
+                    className="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400"
+                  >
+                    {/* Radiating success pulses */}
+                    <motion.span
+                      className="absolute inset-0 rounded-full border border-emerald-400/40"
+                      initial={{ scale: 1, opacity: 0.8 }}
+                      animate={{ scale: 2.1, opacity: 0 }}
+                      transition={{ duration: 1.1, repeat: 2, ease: "easeOut" }}
+                    />
+                    <PartyPopper className="h-7 w-7" />
+                  </motion.div>
+                  <h3 className="text-xl font-bold text-white">
+                    You&apos;re in Wave 1!
+                  </h3>
+                  <p className="mt-1 text-sm font-medium text-emerald-400">
+                    Queue Position #{queuePosition ?? "—"}
+                  </p>
+                  <p className="mx-auto mt-3 max-w-sm text-sm text-gray-400">
+                    We&apos;re onboarding 50 stores this week to ensure
+                    1-on-1 audit accuracy. Check{" "}
+                    <span className="text-gray-200">{email}</span> for your
+                    instant setup link.
+                  </p>
+                  <button
+                    onClick={resetAndClose}
+                    className="mt-6 rounded-lg border border-white/[0.08] px-5 py-2.5 text-sm font-medium text-gray-300 transition hover:bg-white/5"
+                  >
+                    Done
+                  </button>
+                </motion.div>
+              ) : (
                 <motion.div
                   key="form"
                   initial={{ opacity: 0 }}
@@ -133,7 +209,7 @@ export default function WaitlistModal() {
                         placeholder="brandname.myshopify.com"
                         value={storeUrl}
                         onChange={(e) => setStoreUrl(e.target.value)}
-                        className="w-full rounded-lg border border-line bg-ink px-3.5 py-2.5 text-sm text-white placeholder:text-gray-600 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                        className="w-full rounded-lg border border-white/[0.08] bg-black/20 px-3.5 py-2.5 text-sm text-white placeholder:text-gray-600 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
 
@@ -151,7 +227,7 @@ export default function WaitlistModal() {
                         placeholder="you@brandname.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full rounded-lg border border-line bg-ink px-3.5 py-2.5 text-sm text-white placeholder:text-gray-600 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                        className="w-full rounded-lg border border-white/[0.08] bg-black/20 px-3.5 py-2.5 text-sm text-white placeholder:text-gray-600 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                       />
                     </div>
 
@@ -166,7 +242,7 @@ export default function WaitlistModal() {
                         id="revenue"
                         value={revenue}
                         onChange={(e) => setRevenue(e.target.value)}
-                        className="w-full rounded-lg border border-line bg-ink px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                        className="w-full rounded-lg border border-white/[0.08] bg-black/20 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                       >
                         {REVENUE_BANDS.map((band) => (
                           <option key={band} value={band}>
@@ -176,16 +252,25 @@ export default function WaitlistModal() {
                       </select>
                     </div>
 
+                    {status === "error" && errorMessage && (
+                      <div className="flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3.5 py-2.5 text-xs text-red-300">
+                        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                        {errorMessage}
+                      </div>
+                    )}
+
                     <button
                       type="submit"
                       disabled={status === "submitting"}
-                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 py-3 text-sm font-semibold text-ink transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
+                      className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 py-3 text-sm font-semibold text-[#07090E] transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       {status === "submitting" ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin" />
                           Securing your spot…
                         </>
+                      ) : status === "error" ? (
+                        "Try Again →"
                       ) : (
                         "Claim My Wave 1 Spot →"
                       )}
@@ -196,45 +281,6 @@ export default function WaitlistModal() {
                       anytime with one click.
                     </p>
                   </form>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="success"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="py-4 text-center"
-                >
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 260,
-                      damping: 15,
-                      delay: 0.1,
-                    }}
-                    className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400"
-                  >
-                    <PartyPopper className="h-7 w-7" />
-                  </motion.div>
-                  <h3 className="text-xl font-bold text-white">
-                    You&apos;re in Wave 1!
-                  </h3>
-                  <p className="mt-1 text-sm font-medium text-emerald-400">
-                    Queue Position #{queuePosition}
-                  </p>
-                  <p className="mx-auto mt-3 max-w-sm text-sm text-gray-400">
-                    We&apos;re onboarding 50 stores this week to ensure
-                    1-on-1 audit accuracy. Check{" "}
-                    <span className="text-gray-200">{email}</span> for your
-                    instant setup link.
-                  </p>
-                  <button
-                    onClick={resetAndClose}
-                    className="mt-6 rounded-lg border border-line px-5 py-2.5 text-sm font-medium text-gray-300 transition hover:bg-white/5"
-                  >
-                    Done
-                  </button>
                 </motion.div>
               )}
             </AnimatePresence>

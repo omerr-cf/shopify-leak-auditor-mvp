@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
+// Geist ships as local font files (no Google Fonts network fetch at build
+// time), and gives the Linear/Stripe-tier feel requested for this redesign.
 
 const siteUrl = "https://leakaudit-mvp.vercel.app";
 const title =
@@ -59,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={GeistSans.variable}>
       <body className="font-sans bg-ink text-gray-200 antialiased">
         {children}
       </body>

@@ -61,7 +61,7 @@ export default function Comparison() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.5 }}
-          className="overflow-hidden rounded-2xl border border-line"
+          className="glass-panel overflow-hidden rounded-2xl"
         >
           {/* Header row */}
           <div className="grid grid-cols-3 border-b border-line bg-[#111827] text-xs font-semibold uppercase tracking-wide sm:text-sm">
