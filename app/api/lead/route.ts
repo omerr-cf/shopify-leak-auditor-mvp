@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { getStore } from "@netlify/blobs";
 
 export const runtime = "nodejs";
 
@@ -7,6 +8,13 @@ type LeadPayload = {
   storeUrl: string;
   email: string;
   revenue: string;
+};
+
+type LeadRecord = LeadPayload & {
+  submittedAt: string;
+  referrer: string;
+  ip: string;
+  queuePosition: number;
 };
 
 function isValidLead(body: unknown): body is LeadPayload {
@@ -83,6 +91,31 @@ function buildEmailHtml(params: {
   `;
 }
 
+/**
+ * Persists the lead to Netlify Blobs so it's never lost even if the Resend
+ * email fails, silently fails, or lands somewhere nobody checks. This is
+ * the durable source of truth; email is just a notification on top of it.
+ *
+ * Netlify Blobs only has real credentials available when running inside
+ * Netlify's own environment (a deployed site, or `netlify dev` locally) —
+ * plain `next dev` has no site context, so this is wrapped defensively and
+ * never blocks or breaks the request if it can't persist.
+ */
+async function persistLead(record: LeadRecord): Promise<boolean> {
+  try {
+    const store = getStore("leads");
+    const key = `${Date.now()}-${crypto.randomUUID()}`;
+    await store.setJSON(key, record);
+    return true;
+  } catch (err) {
+    console.warn(
+      "[api/lead] Could not persist to Netlify Blobs (expected if you're running `next dev` instead of `netlify dev` locally — Blobs needs Netlify's own environment):",
+      err instanceof Error ? err.message : err
+    );
+    return false;
+  }
+}
+
 export async function POST(req: NextRequest) {
   let body: unknown;
   try {
@@ -115,12 +148,26 @@ export async function POST(req: NextRequest) {
   // Slight randomization so every visitor doesn't see the identical number.
   const queuePosition = Math.floor(Math.random() * 37) + 8;
 
-  const notifyEmail = process.env.LEAD_NOTIFICATION_EMAIL || "omerbussy1995@gmail.com";
+  const leadRecord: LeadRecord = {
+    storeUrl,
+    email,
+    revenue,
+    submittedAt,
+    referrer,
+    ip,
+    queuePosition,
+  };
+
+  // Persist FIRST, independent of whether email ends up working — this is
+  // the fix for leads silently disappearing when Resend isn't configured
+  // right or the notification inbox gets missed.
+  const saved = await persistLead(leadRecord);
+
+  const notifyEmail =
+    process.env.LEAD_NOTIFICATION_EMAIL || "omerbussy1995@gmail.com";
   const fromEmail =
     process.env.LEAD_FROM_EMAIL || "LeakAudit Leads <onboarding@resend.dev>";
   const apiKey = process.env.RESEND_API_KEY;
-
-  const leadRecord = { storeUrl, email, revenue, submittedAt, referrer, ip };
 
   // --- No Resend key configured yet: log to console, never break the UI. ---
   if (!apiKey) {
@@ -132,6 +179,7 @@ export async function POST(req: NextRequest) {
       success: true,
       queuePosition,
       emailed: false,
+      saved,
     });
   }
 
@@ -154,15 +202,26 @@ export async function POST(req: NextRequest) {
         success: true,
         queuePosition,
         emailed: false,
+        saved,
       });
     }
 
-    return NextResponse.json({ success: true, queuePosition, emailed: true });
+    return NextResponse.json({
+      success: true,
+      queuePosition,
+      emailed: true,
+      saved,
+    });
   } catch (err) {
     // Network/SDK-level failure — same rule: never break the client UI
     // over an email delivery problem.
     console.error("[api/lead] Resend send threw:", err);
     console.log("[api/lead] Lead payload (fallback log):", leadRecord);
-    return NextResponse.json({ success: true, queuePosition, emailed: false });
+    return NextResponse.json({
+      success: true,
+      queuePosition,
+      emailed: false,
+      saved,
+    });
   }
 }

@@ -10,7 +10,7 @@ A single-page marketing/validation site with:
 - A high-fidelity mockup of the real product's 1-page report
 - A brutally honest comparison table vs. BeProfit/Lifetimely
 - An objections FAQ (performance, security scope, pricing philosophy)
-- A "Wave 1" waitlist modal that posts to `/api/lead`, which emails you the lead via Resend (or logs to console if you haven't set up Resend yet — the UI never breaks either way)
+- A "Wave 1" waitlist modal that posts to `/api/lead`, which durably persists every lead to Netlify Blobs *and* emails you a notification via Resend (email is best-effort on top of storage, not the source of truth — a lead is never lost just because an email didn't send)
 
 ## Local development
 
@@ -27,7 +27,17 @@ Visit `http://localhost:3000`.
 2. Sign up at [resend.com](https://resend.com), verify a sending domain (you cannot send from a bare Gmail address — Resend requires a domain you control), and grab an API key.
 3. Set `RESEND_API_KEY`, and optionally override `LEAD_NOTIFICATION_EMAIL` (defaults to `omerbussy1995@gmail.com` in code) and `LEAD_FROM_EMAIL`.
 4. Until you do this, `app/api/lead/route.ts` still returns success to the client and logs the full lead payload to the server console — so the waitlist modal works and captures leads from day one, you just won't get the email alert until Resend is wired up.
-5. Leads also get a best-effort backup written to `localStorage` (`leakaudit_waitlist`) client-side, purely as a redundant local record — the API response is the source of truth for the queue-position number shown to the merchant.
+5. Leads also get a best-effort backup written to `localStorage` (`leakaudit_waitlist`) client-side — purely a redundant, per-visitor local record, not something you can see. The real, durable record is Netlify Blobs (below).
+
+## Where leads actually get stored (Netlify Blobs)
+
+Every submission to `/api/lead` is written to a Netlify Blobs store named `leads` *before* the Resend email is even attempted — so a misconfigured API key, a 403 from Resend's sandbox restrictions, or a missed inbox never means a lost lead. The API response includes both `emailed` and `saved` booleans so you can tell which succeeded.
+
+**Viewing captured leads:**
+- Set `ADMIN_SECRET` in your environment (Netlify dashboard or `netlify env:set ADMIN_SECRET "something-long-and-random"`), then visit `https://your-site.netlify.app/api/leads?secret=YOUR_ADMIN_SECRET` for a JSON dump of every lead, newest first. The endpoint is disabled entirely (503) if `ADMIN_SECRET` isn't set — it never ships open by accident.
+- Or via the CLI: `netlify blobs:list --store=leads` to see keys, `netlify blobs:get --store=leads --key=<key>` to read one.
+
+**Local development caveat:** Netlify Blobs needs Netlify's own environment to authenticate. Plain `npm run dev` (`next dev`) can't reach it — `persistLead()` catches that and logs a warning instead of crashing the route, so the form still works locally, it just won't actually persist anything until you either run `netlify dev` instead, or test against the deployed site.
 
 ## Swapping in a real Lottie animation
 
