@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { LottieRefCurrentProps } from "lottie-react";
 
 // Loaded client-side only — lottie-react touches `document` on import,
 // which breaks server rendering if imported statically.
@@ -19,6 +20,9 @@ const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
  *   <LottieSlot src="/lottie/radar-scan.json" fallback={<RadarScan />} />
  *
  * `animationData` still works too, for a JSON you'd rather inline directly.
+ * `speed` (default 1) is applied via lottie's playback API once the
+ * animation mounts — a plain prop on the underlying config doesn't affect
+ * playback rate, so this goes through `lottieRef.setSpeed()`.
  */
 export default function LottieSlot({
   src,
@@ -26,17 +30,20 @@ export default function LottieSlot({
   fallback,
   className,
   loop = true,
+  speed = 1,
 }: {
   src?: string;
   animationData?: object;
   fallback: ReactNode;
   className?: string;
   loop?: boolean;
+  speed?: number;
 }) {
   const [fetchedData, setFetchedData] = useState<object | undefined>(
     undefined
   );
   const [failed, setFailed] = useState(false);
+  const lottieRef = useRef<LottieRefCurrentProps | null>(null);
 
   useEffect(() => {
     if (!src || animationData) return;
@@ -66,5 +73,13 @@ export default function LottieSlot({
     return <div className={className}>{fallback}</div>;
   }
 
-  return <Lottie animationData={data} loop={loop} className={className} />;
+  return (
+    <Lottie
+      lottieRef={lottieRef}
+      animationData={data}
+      loop={loop}
+      className={className}
+      onDOMLoaded={() => lottieRef.current?.setSpeed(speed)}
+    />
+  );
 }

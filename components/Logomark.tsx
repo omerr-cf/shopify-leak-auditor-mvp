@@ -1,29 +1,74 @@
+import { useId } from "react";
+
 /**
- * Custom brand mark — a droplet (leak) with a checkmark (found & fixed)
- * inside it. Deliberately not a generic Lucide "Zap" bolt in a circle,
- * which is the single most overused icon in AI-generated SaaS landing
- * pages. Pure inline SVG, no icon library, so it always renders exactly
- * the same regardless of what icon set the rest of the site uses.
+ * Custom brand mark — a self-contained rounded-square badge (works standalone
+ * as a favicon, not just inside a header pill) with a gradient fill, a subtle
+ * top highlight for the same "lit from above" glass treatment used across the
+ * site, and a crisp checkmark. Deliberately not a generic Lucide "Zap" bolt
+ * in a circle, the single most overused icon in AI-generated SaaS landing
+ * pages, and deliberately not a currentColor line-icon either — a fixed
+ * brand mark reads more premium and stays legible at favicon sizes.
+ *
+ * `muted` swaps the emerald gradient for a neutral gray one, for contexts
+ * like the footer where a full-color mark would compete with the copy.
  */
-export default function Logomark({ className = "h-6 w-6" }: { className?: string }) {
+export default function Logomark({
+  className = "h-8 w-8",
+  muted = false,
+}: {
+  className?: string;
+  muted?: boolean;
+}) {
+  const uid = useId();
+  const gradId = `logomark-grad-${uid}`;
+  const clipId = `logomark-clip-${uid}`;
+
   return (
     <svg
-      viewBox="0 0 24 24"
+      viewBox="0 0 32 32"
       fill="none"
       className={className}
       aria-hidden="true"
     >
+      <defs>
+        <linearGradient
+          id={gradId}
+          x1="4"
+          y1="2"
+          x2="29"
+          y2="30"
+          gradientUnits="userSpaceOnUse"
+        >
+          {muted ? (
+            <>
+              <stop offset="0" stopColor="#4B5563" />
+              <stop offset="1" stopColor="#1F2937" />
+            </>
+          ) : (
+            <>
+              <stop offset="0" stopColor="#6EE7B7" />
+              <stop offset="0.55" stopColor="#10B981" />
+              <stop offset="1" stopColor="#047857" />
+            </>
+          )}
+        </linearGradient>
+        <clipPath id={clipId}>
+          <rect x="1" y="1" width="30" height="30" rx="9" />
+        </clipPath>
+      </defs>
+
+      <rect x="1" y="1" width="30" height="30" rx="9" fill={`url(#${gradId})`} />
+
+      {/* Glossy top highlight — same "lit from above" cue as .glass-panel */}
+      <g clipPath={`url(#${clipId})`}>
+        <rect x="1" y="1" width="30" height="13" fill="white" fillOpacity="0.16" />
+        <rect x="1" y="1" width="30" height="30" fill="black" fillOpacity="0.06" />
+      </g>
+
       <path
-        d="M12 2.5C12 2.5 5.25 11 5.25 15.25a6.75 6.75 0 0 0 13.5 0C18.75 11 12 2.5 12 2.5Z"
-        fill="currentColor"
-        fillOpacity="0.16"
-        stroke="currentColor"
-        strokeWidth="1.4"
-      />
-      <path
-        d="M8.75 14.25 11 16.5l4.25-5"
-        stroke="currentColor"
-        strokeWidth="1.6"
+        d="M9.5 16.6 13.7 20.8 23 11.3"
+        stroke="white"
+        strokeWidth="3.1"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

@@ -15,6 +15,25 @@ export default function Hero() {
       <div className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[900px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[120px]" />
       <div className="pointer-events-none absolute right-0 top-24 h-[380px] w-[560px] rounded-full bg-cyan-500/[0.06] blur-[110px]" />
 
+      {/*
+        LOTTIE SLOT #1 — "hero-scan" (background placement)
+        Live: public/lottie/hero-scan.json (recolored to the site's emerald
+        palette). Sits behind all the hero copy, faded via opacity + a wide
+        radial mask so it reads as ambient texture filling the section
+        rather than a literal icon. Speed is slowed to 0.55x — the source
+        file plays fast by default and reads jittery at this size.
+        fallback is null — nothing renders until the fetch resolves, which
+        is fine since it's a background flourish, not content.
+      */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden opacity-[0.16] [mask-image:radial-gradient(ellipse_85%_80%_at_50%_35%,#000_45%,transparent_92%)] sm:opacity-[0.22]">
+        <LottieSlot
+          src="/lottie/hero-scan.json"
+          fallback={null}
+          speed={0.55}
+          className="w-[900px] max-w-none sm:w-[1200px] lg:w-[1500px] xl:w-[1700px]"
+        />
+      </div>
+
       <div className="relative mx-auto max-w-4xl px-4 pb-16 pt-16 text-center sm:px-6 sm:pb-20 sm:pt-24">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -84,26 +103,13 @@ export default function Hero() {
           </div>
         </motion.div>
 
-        {/*
-          LOTTIE SLOT #1 — "hero-scan"
-          Live: public/lottie/hero-scan.json (recolored to match the site's
-          emerald palette). Falls back to the pure-CSS RadarScan dot if
-          the animation ever fails to load.
-        */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           className="glass-panel mx-auto mt-12 flex w-fit items-center gap-3 rounded-full px-5 py-3"
         >
-          <LottieSlot
-            src="/lottie/hero-scan.json"
-            fallback={<RadarScan label="Scanning your store's revenue..." />}
-            className="h-9 w-14 shrink-0"
-          />
-          <span className="text-xs font-medium tracking-wide text-emerald-300/80">
-            Scanning your store&apos;s revenue...
-          </span>
+          <RadarScan label="Scanning your store's revenue..." />
         </motion.div>
       </div>
     </section>

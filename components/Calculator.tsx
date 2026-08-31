@@ -6,7 +6,6 @@ import { CreditCard, Package, Ghost, RotateCcw } from "lucide-react";
 import { estimateLeaks, formatUSD } from "@/lib/utils";
 import { useModal } from "./ModalProvider";
 import AnimatedNumber from "./AnimatedNumber";
-import RadarScan from "./RadarScan";
 import LottieSlot from "./LottieSlot";
 import IconTile from "./IconTile";
 
@@ -51,8 +50,25 @@ export default function Calculator() {
   return (
     <section
       id="calculator"
-      className="mesh-bg relative border-b border-line/60"
+      className="mesh-bg relative overflow-hidden border-b border-line/60"
     >
+      {/*
+        LOTTIE SLOT #2 — "calc-radar" (background placement)
+        Live: public/lottie/calc-radar.json — a figure working through a
+        chart. Faded and bled off the left edge of the section so it reads
+        as ambient background texture behind the calculator, not a literal
+        icon. Hidden below lg: at narrower widths there's no spare room for
+        a background flourish next to the calculator card without it
+        competing with the sliders.
+      */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-[560px] items-center overflow-hidden opacity-[0.13] [mask-image:linear-gradient(to_right,#000_35%,transparent_92%)] lg:flex xl:w-[680px]">
+        <LottieSlot
+          src="/lottie/calc-radar.json"
+          fallback={null}
+          className="-ml-24 w-[520px] max-w-none xl:w-[640px]"
+        />
+      </div>
+
       <div className="relative mx-auto max-w-5xl px-4 py-20 sm:px-6">
         <div className="mx-auto mb-6 max-w-2xl text-center">
           <span className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
@@ -82,19 +98,6 @@ export default function Calculator() {
             the last 24 hours (<span className="font-mono">$1.4M</span> GMV
             analyzed)
           </span>
-        </div>
-
-        {/*
-          LOTTIE SLOT #2 — "calc-radar"
-          Live: public/lottie/calc-radar.json — a small figure working
-          through a chart, playing on loop while the merchant drags sliders.
-        */}
-        <div className="mb-8 flex justify-center">
-          <LottieSlot
-            src="/lottie/calc-radar.json"
-            fallback={<RadarScan />}
-            className="h-20 w-20 sm:h-24 sm:w-24"
-          />
         </div>
 
         <div className="glass-panel grid gap-8 rounded-2xl p-6 shadow-xl shadow-black/30 sm:p-8 lg:grid-cols-2 lg:gap-12">

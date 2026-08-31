@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="px-4 py-10 sm:px-6">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 text-xs text-gray-600 sm:flex-row">
         <div className="flex items-center gap-1.5">
-          <Logomark className="h-3.5 w-3.5 text-gray-600" />
+          <Logomark className="h-4 w-4" muted />
           LeakAudit for Shopify
         </div>
         <p>

@@ -14,9 +14,35 @@ import { useModal } from "./ModalProvider";
 import IconTile from "./IconTile";
 import LottieSlot from "./LottieSlot";
 
-const LEAK_CARDS = [
+type Tone = "emerald" | "amber" | "cyan" | "red";
+
+const TONE_TEXT: Record<Tone, string> = {
+  emerald: "text-emerald-400",
+  amber: "text-amber-400",
+  cyan: "text-cyan-400",
+  red: "text-red-400",
+};
+
+const TONE_BORDER: Record<Tone, string> = {
+  emerald: "before:bg-emerald-500/70",
+  amber: "before:bg-amber-500/70",
+  cyan: "before:bg-cyan-500/70",
+  red: "before:bg-red-500/70",
+};
+
+const LEAK_CARDS: Array<{
+  icon: React.ReactElement;
+  tone: Tone;
+  category: string;
+  title: string;
+  detail: string;
+  amount: string;
+  fix: string;
+}> = [
   {
     icon: <CreditCard />,
+    tone: "emerald",
+    category: "FX & Payments",
     title: "Non-Native Currency Gateway Markup",
     detail:
       "23% of orders settle in EUR/GBP through a gateway route charging a 1.9% FX markup above interbank rate.",
@@ -25,6 +51,8 @@ const LEAK_CARDS = [
   },
   {
     icon: <PackageX />,
+    tone: "amber",
+    category: "Margin",
     title: "2 SKUs Selling at Negative Margin After Shipping",
     detail:
       '"Weighted Canvas Tote — Large" and "Ceramic Mug Bundle" cost more to fulfill than they sell for once shipping is included.',
@@ -33,6 +61,8 @@ const LEAK_CARDS = [
   },
   {
     icon: <Gauge />,
+    tone: "cyan",
+    category: "Performance",
     title: "3 Leftover Theme Scripts Delaying Mobile Load by 1.4s",
     detail:
       "Scripts from 3 uninstalled apps are still injected in theme.liquid, slowing mobile checkout and depressing conversion.",
@@ -41,6 +71,8 @@ const LEAK_CARDS = [
   },
   {
     icon: <RotateCcw />,
+    tone: "red",
+    category: "Returns",
     title: "1 Variant with 22% Return Rate",
     detail:
       '"Slim Fit Denim — 32W" returns at 4.8x your store average, driving silent refund + restocking drag.',
@@ -82,7 +114,11 @@ export default function ReportMockup() {
               Store: <span className="text-white">UrbanAesthetic.myshopify.com</span>
               <span className="text-gray-600">— Cash Leak Audit</span>
             </div>
-            <span className="hidden rounded-full border border-line px-2.5 py-1 text-[11px] text-gray-500 sm:inline-block">
+            <span className="hidden items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-[11px] text-gray-500 sm:inline-flex">
+              <span className="relative flex h-1.5 w-1.5 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              </span>
               Refreshed 4 min ago
             </span>
           </div>
@@ -113,6 +149,10 @@ export default function ReportMockup() {
                 </span>
               </span>
             </div>
+            <p className="text-xs text-red-300/70">
+              4 leaks detected across FX, margin, performance &amp; returns —
+              here&apos;s exactly where it&apos;s going.
+            </p>
           </div>
 
           {/* Leak cards */}
@@ -120,14 +160,14 @@ export default function ReportMockup() {
             {LEAK_CARDS.map((card, i) => (
               <div
                 key={card.title}
-                className="rounded-xl border border-line bg-ink p-4"
+                className={`group relative overflow-hidden rounded-xl border border-line bg-ink p-4 pl-5 transition-colors hover:border-white/[0.14] before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:content-[''] ${TONE_BORDER[card.tone]}`}
               >
                 <div className="mb-2.5 flex items-start justify-between gap-3">
                   <div className="flex items-start gap-2.5">
-                    <IconTile icon={card.icon} tone="amber" size="md" className="mt-0.5" />
+                    <IconTile icon={card.icon} tone={card.tone} size="md" className="mt-0.5" />
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                        Leak {i + 1}
+                        Leak {i + 1} · {card.category}
                       </p>
                       <p className="text-sm font-semibold leading-snug text-white">
                         {card.title}
@@ -139,7 +179,7 @@ export default function ReportMockup() {
                   {card.detail}
                 </p>
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-sm font-bold text-amber-400">
+                  <span className={`font-mono text-sm font-bold ${TONE_TEXT[card.tone]}`}>
                     {card.amount}
                   </span>
                   <button className="flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-400 transition hover:bg-emerald-500/20">

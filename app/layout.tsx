@@ -41,20 +41,15 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: "LeakAudit for Shopify",
     type: "website",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "LeakAudit — Cash Leak Report preview",
-      },
-    ],
+    // No explicit `images` here — app/opengraph-image.tsx generates a real
+    // branded 1200x630 PNG at build time and Next wires it in automatically.
+    // The old code pointed at a static /og-image.png that was never
+    // actually added to public/, so every social share was a broken image.
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
-    images: ["/og-image.png"],
   },
   robots: {
     index: true,
