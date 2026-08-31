@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, PartyPopper, ShieldCheck, Loader2, AlertTriangle } from "lucide-react";
 import { useModal } from "./ModalProvider";
+import LottieSlot from "./LottieSlot";
 
 const REVENUE_BANDS = [
   "$10K – $25K/mo",
@@ -135,38 +136,38 @@ export default function WaitlistModal() {
                 >
                   {/*
                     LOTTIE SLOT #3 — "success-celebration"
-                    The highest-emotion moment on the site (someone just
-                    converted). A confetti burst or checkmark-morph reads
-                    best here. Swap the fallback prop for:
-                      <LottieSlot
-                        animationData={successAnimation}
-                        fallback={<>...current pulse+icon markup...</>}
-                        className="mx-auto mb-4 h-16 w-16"
-                        loop={false}
-                      />
-                    Until then, the pure-CSS radiating pulse + PartyPopper
-                    icon below carries the moment.
+                    Live: public/lottie/success-celebration.json — a
+                    checkmark-morph with a confetti burst, played once.
+                    Falls back to the CSS pulse + PartyPopper icon below if
+                    the animation ever fails to load.
                   */}
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 260,
-                      damping: 15,
-                      delay: 0.1,
-                    }}
-                    className="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400"
-                  >
-                    {/* Radiating success pulses */}
-                    <motion.span
-                      className="absolute inset-0 rounded-full border border-emerald-400/40"
-                      initial={{ scale: 1, opacity: 0.8 }}
-                      animate={{ scale: 2.1, opacity: 0 }}
-                      transition={{ duration: 1.1, repeat: 2, ease: "easeOut" }}
-                    />
-                    <PartyPopper className="h-7 w-7" strokeWidth={1.75} />
-                  </motion.div>
+                  <LottieSlot
+                    src="/lottie/success-celebration.json"
+                    loop={false}
+                    className="mx-auto mb-4 h-20 w-20"
+                    fallback={
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 260,
+                          damping: 15,
+                          delay: 0.1,
+                        }}
+                        className="relative mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400"
+                      >
+                        {/* Radiating success pulses */}
+                        <motion.span
+                          className="absolute inset-0 rounded-full border border-emerald-400/40"
+                          initial={{ scale: 1, opacity: 0.8 }}
+                          animate={{ scale: 2.1, opacity: 0 }}
+                          transition={{ duration: 1.1, repeat: 2, ease: "easeOut" }}
+                        />
+                        <PartyPopper className="h-7 w-7" strokeWidth={1.75} />
+                      </motion.div>
+                    }
+                  />
                   <h3 className="font-display text-xl font-medium text-white">
                     You&apos;re in Wave 1!
                   </h3>

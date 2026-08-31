@@ -86,12 +86,15 @@ export default function Calculator() {
 
         {/*
           LOTTIE SLOT #2 — "calc-radar"
-          Small, frequent, low-key — a looping scan/pulse animation fits
-          best here. Swap the fallback prop for:
-            <LottieSlot animationData={calcRadarAnimation} fallback={<RadarScan />} />
+          Live: public/lottie/calc-radar.json — a small figure working
+          through a chart, playing on loop while the merchant drags sliders.
         */}
         <div className="mb-8 flex justify-center">
-          <LottieSlot fallback={<RadarScan />} />
+          <LottieSlot
+            src="/lottie/calc-radar.json"
+            fallback={<RadarScan />}
+            className="h-20 w-20 sm:h-24 sm:w-24"
+          />
         </div>
 
         <div className="glass-panel grid gap-8 rounded-2xl p-6 shadow-xl shadow-black/30 sm:p-8 lg:grid-cols-2 lg:gap-12">

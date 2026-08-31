@@ -39,9 +39,29 @@ Every submission to `/api/lead` is written to a Netlify Blobs store named `leads
 
 **Local development caveat:** Netlify Blobs needs Netlify's own environment to authenticate. Plain `npm run dev` (`next dev`) can't reach it — `persistLead()` catches that and logs a warning instead of crashing the route, so the form still works locally, it just won't actually persist anything until you either run `netlify dev` instead, or test against the deployed site.
 
-## Swapping in a real Lottie animation
+## Lottie animations
 
-`components/RadarScan.tsx` currently renders a pure-CSS pulsing radar dot (Tailwind's `animate-ping`) — zero extra weight, no external asset needed. `components/LottieSlot.tsx` is a ready slot for a real Lottie JSON if you want more polish later: export one from LottieFiles.com, drop it under `public/lottie/`, and pass it as `animationData` — see the comment at the top of that file for the exact usage.
+Three of the four marked Lottie slots are wired up and live, fetched
+client-side from `public/lottie/` (never bundled into the page JS, so the
+site stays light even with real animation assets):
+
+- **Hero** (`hero-scan.json`) — a scanning-matrix animation, recolored to
+  the site's emerald palette, next to "Scanning your store's revenue..."
+- **Calculator** (`calc-radar.json`) — a small figure working through a
+  chart, looping above the sliders
+- **Waitlist success state** (`success-celebration.json`) — a
+  checkmark + confetti burst, played once when a lead converts
+
+The fourth slot, `components/ReportMockup.tsx` ("report-leak-icon", next to
+the red total-leaks banner), is still open — none of the animations
+received so far fit a "money leaking" moment without clashing with that
+banner's red/alarm framing. See the comment at that slot for what to send.
+
+`components/LottieSlot.tsx` is the shared component: pass `src="/lottie/x.json"`
+and it fetches and renders full-motion, falling back to a CSS-only visual
+(`components/RadarScan.tsx` or similar) if the fetch ever fails. To add a
+new animation: export the JSON from LottieFiles.com, drop it under
+`public/lottie/`, and pass its path as `src`.
 
 ## Notes on the calculator numbers
 

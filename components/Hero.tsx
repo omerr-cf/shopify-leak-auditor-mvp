@@ -86,16 +86,9 @@ export default function Hero() {
 
         {/*
           LOTTIE SLOT #1 — "hero-scan"
-          The most prominent slot on the page. Once you have a Lottie JSON
-          (a coin/leak/money-scan animation reads best here), swap the
-          fallback below for:
-            <LottieSlot
-              animationData={heroScanAnimation}
-              fallback={<RadarScan label="Scanning your store's revenue..." />}
-              className="h-40 w-40"
-            />
-          Until then it renders the pure-CSS RadarScan fallback so the slot
-          never looks empty.
+          Live: public/lottie/hero-scan.json (recolored to match the site's
+          emerald palette). Falls back to the pure-CSS RadarScan dot if
+          the animation ever fails to load.
         */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -104,8 +97,13 @@ export default function Hero() {
           className="glass-panel mx-auto mt-12 flex w-fit items-center gap-3 rounded-full px-5 py-3"
         >
           <LottieSlot
+            src="/lottie/hero-scan.json"
             fallback={<RadarScan label="Scanning your store's revenue..." />}
+            className="h-9 w-14 shrink-0"
           />
+          <span className="text-xs font-medium tracking-wide text-emerald-300/80">
+            Scanning your store&apos;s revenue...
+          </span>
         </motion.div>
       </div>
     </section>

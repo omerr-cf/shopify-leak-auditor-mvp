@@ -95,12 +95,15 @@ export default function ReportMockup() {
             <div className="flex items-center gap-3">
               {/*
                 LOTTIE SLOT #4 — "report-leak-icon"
-                Small accent next to the headline total — a coin-drip or
-                downward-then-caught animation fits well here. Swap for:
+                Still open. The 4 Lotties received so far (a scanning
+                matrix, a person-with-chart, and a green success
+                checkmark) don't fit this spot semantically — this banner
+                is a red "problem found" alert, and a green checkmark here
+                would read as the opposite signal. Best fit is a coin-drip
+                / money-leaving animation. Once you have one:
                   <LottieSlot animationData={leakIconAnimation} fallback={null} className="h-8 w-8" />
-                fallback is intentionally null here (nothing renders until
-                you add a real animation — the number alone carries this
-                moment fine on its own).
+                fallback stays null until then — the number alone carries
+                this moment fine on its own.
               */}
               <LottieSlot fallback={null} />
               <span className="font-mono text-4xl font-bold text-red-400 sm:text-5xl">
