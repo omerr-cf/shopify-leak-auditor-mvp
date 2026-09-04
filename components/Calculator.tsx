@@ -1,13 +1,25 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
-import { CreditCard, Package, Ghost, RotateCcw } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  CreditCard,
+  Package,
+  Ghost,
+  RotateCcw,
+  Lock,
+  Unlock,
+  Flame,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
 import { estimateLeaks, formatUSD } from "@/lib/utils";
 import { useModal } from "./ModalProvider";
 import AnimatedNumber from "./AnimatedNumber";
 import LottieSlot from "./LottieSlot";
 import IconTile from "./IconTile";
+
+type UnlockStatus = "idle" | "submitting" | "error";
 
 export default function Calculator() {
   const { openModal } = useModal();
@@ -15,10 +27,53 @@ export default function Calculator() {
   const [apps, setApps] = useState(12);
   const [crossBorderShare, setCrossBorderShare] = useState(20);
 
+  // Gated breakdown: the visitor always sees the big total, but the 4
+  // category cards stay blurred behind a single-field email unlock. Cold
+  // Meta traffic was bouncing because the full breakdown was free to see —
+  // this turns "curiosity satisfied" into "curiosity satisfied only after
+  // giving an email."
+  const [unlocked, setUnlocked] = useState(false);
+  const [unlockEmail, setUnlockEmail] = useState("");
+  const [unlockStatus, setUnlockStatus] = useState<UnlockStatus>("idle");
+  const [showUnlockToast, setShowUnlockToast] = useState(false);
+
   const leaks = useMemo(
     () => estimateLeaks({ revenue, apps, crossBorderShare }),
     [revenue, apps, crossBorderShare]
   );
+
+  async function handleUnlock(e: React.FormEvent) {
+    e.preventDefault();
+    if (!unlockEmail || unlockStatus === "submitting") return;
+
+    setUnlockStatus("submitting");
+
+    try {
+      const res = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: unlockEmail,
+          estimatedLeak: Math.round(leaks.total),
+          revenue: `${formatUSD(revenue)}/mo`,
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || `Request failed (${res.status})`);
+      }
+
+      setUnlocked(true);
+      setUnlockStatus("idle");
+      setShowUnlockToast(true);
+      setTimeout(() => setShowUnlockToast(false), 5000);
+    } catch (err) {
+      console.error("[Calculator] unlock failed:", err);
+      setUnlockStatus("error");
+    }
+  }
 
   const rows = [
     {
@@ -150,25 +205,113 @@ export default function Calculator() {
               </span>
             </div>
 
-            <div className="mt-4 space-y-2.5">
-              {rows.map((row) => (
-                <div
-                  key={row.label}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5"
+            {/* Unlock success toast */}
+            <AnimatePresence>
+              {showUnlockToast && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  exit={{ opacity: 0, y: -8, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mt-4 flex items-center gap-2 overflow-hidden rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3.5 py-2.5 text-xs font-medium text-emerald-300"
                 >
-                  <span className="flex items-center gap-2.5 text-sm text-gray-300">
-                    <IconTile icon={row.icon} tone={row.tone} size="sm" />
-                    {row.label}
-                  </span>
-                  <span className="font-mono text-sm font-semibold text-white">
-                    ~<AnimatedNumber
-                      value={row.value}
-                      formatter={(n) => Math.round(n).toLocaleString("en-US")}
-                    />
-                    /mo
-                  </span>
-                </div>
-              ))}
+                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} />
+                  Breakdown unlocked! We also sent a 1-page summary to your
+                  email.
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Gated breakdown — blurred until unlocked with an email */}
+            <div className="relative mt-4 min-h-[220px]">
+              <div
+                aria-hidden={!unlocked}
+                className={`space-y-2.5 transition-all duration-700 ${
+                  unlocked
+                    ? "opacity-100 blur-0"
+                    : "pointer-events-none select-none opacity-60 blur-[8px]"
+                }`}
+              >
+                {rows.map((row) => (
+                  <div
+                    key={row.label}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3.5 py-2.5"
+                  >
+                    <span className="flex items-center gap-2.5 text-sm text-gray-300">
+                      <IconTile icon={row.icon} tone={row.tone} size="sm" />
+                      {row.label}
+                    </span>
+                    <span className="font-mono text-sm font-semibold text-white">
+                      ~<AnimatedNumber
+                        value={row.value}
+                        formatter={(n) => Math.round(n).toLocaleString("en-US")}
+                      />
+                      /mo
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <AnimatePresence>
+                {!unlocked && (
+                  <motion.div
+                    initial={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.35 }}
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 px-3 text-center"
+                  >
+                    <IconTile icon={<Lock />} tone="emerald" size="lg" />
+                    <p className="text-sm font-semibold text-white">
+                      4 Critical Leak Vectors Detected in Your Range
+                    </p>
+                    <p className="max-w-[260px] text-xs leading-relaxed text-gray-400">
+                      Enter your email below to instantly unblur and reveal
+                      where your cash is leaking.
+                    </p>
+
+                    <div className="mt-1 flex items-center gap-1.5 text-[11px] font-medium text-amber-300">
+                      <Flame className="h-3 w-3 shrink-0" strokeWidth={2} />
+                      38 store owners unlocked their audit this week
+                    </div>
+
+                    <form
+                      onSubmit={handleUnlock}
+                      className="mt-1 flex w-full max-w-xs flex-col gap-2"
+                    >
+                      <input
+                        type="email"
+                        required
+                        placeholder="work@company.com"
+                        value={unlockEmail}
+                        onChange={(e) => setUnlockEmail(e.target.value)}
+                        className="w-full rounded-lg border border-white/[0.1] bg-black/40 px-3.5 py-2.5 text-sm text-white placeholder:text-gray-600 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                      />
+                      <button
+                        type="submit"
+                        disabled={unlockStatus === "submitting"}
+                        className="animate-pulse-glow flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-b from-emerald-400 to-emerald-500 py-2.5 text-xs font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:from-emerald-300 hover:to-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
+                      >
+                        {unlockStatus === "submitting" ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Unlock className="h-3.5 w-3.5" strokeWidth={2} />
+                        )}
+                        Unlock My Breakdown (Instant)
+                      </button>
+                    </form>
+
+                    {unlockStatus === "error" && (
+                      <p className="text-[11px] text-red-400">
+                        Something glitched — try again in a moment.
+                      </p>
+                    )}
+
+                    <p className="text-[10px] text-gray-600">
+                      🔒 Zero spam. Instant unblur. 1-click unsubscribe.
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <motion.button

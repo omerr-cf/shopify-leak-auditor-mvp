@@ -6,22 +6,12 @@ import { X, PartyPopper, ShieldCheck, Loader2, AlertTriangle } from "lucide-reac
 import { useModal } from "./ModalProvider";
 import LottieSlot from "./LottieSlot";
 
-const REVENUE_BANDS = [
-  "$10K – $25K/mo",
-  "$25K – $50K/mo",
-  "$50K – $100K/mo",
-  "$100K – $150K/mo",
-  "$150K+/mo",
-];
-
 type Status = "idle" | "submitting" | "success" | "error";
 
 export default function WaitlistModal() {
   const { isOpen, closeModal } = useModal();
   const [status, setStatus] = useState<Status>("idle");
-  const [storeUrl, setStoreUrl] = useState("");
   const [email, setEmail] = useState("");
-  const [revenue, setRevenue] = useState(REVENUE_BANDS[1]);
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -30,9 +20,7 @@ export default function WaitlistModal() {
     // Give the exit animation time to finish before resetting form state
     setTimeout(() => {
       setStatus("idle");
-      setStoreUrl("");
       setEmail("");
-      setRevenue(REVENUE_BANDS[1]);
       setQueuePosition(null);
       setErrorMessage(null);
     }, 300);
@@ -51,7 +39,7 @@ export default function WaitlistModal() {
         "leakaudit_waitlist",
         JSON.stringify([
           ...existing,
-          { storeUrl, email, revenue, submittedAt: new Date().toISOString() },
+          { email, submittedAt: new Date().toISOString() },
         ])
       );
     } catch {
@@ -61,16 +49,19 @@ export default function WaitlistModal() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!storeUrl || !email) return;
+    if (!email) return;
 
     setStatus("submitting");
     setErrorMessage(null);
 
     try {
+      // Email-only — cold traffic gives an email freely but hesitates over
+      // an exact .myshopify.com domain, so storeUrl/revenue are no longer
+      // collected here. app/api/lead/route.ts defaults them server-side.
       const res = await fetch("/api/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ storeUrl, email, revenue }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await res.json().catch(() => null);
@@ -201,33 +192,16 @@ export default function WaitlistModal() {
                     </span>
                   </div>
                   <h3 className="font-display text-xl font-medium text-white sm:text-2xl">
-                    Connect Your Shopify Store for Wave&nbsp;1 Access
+                    Get Your Full Cash Leak Report
                   </h3>
                   <p className="mt-2 text-sm text-gray-400">
                     We&apos;re onboarding a small batch first so every audit
-                    gets checked by hand before it ships. Drop your details
-                    and we&apos;ll send your instant setup link.
+                    gets checked by hand before it ships. Drop your email and
+                    we&apos;ll send your instant setup link — no store URL
+                    needed yet.
                   </p>
 
                   <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-                    <div>
-                      <label
-                        htmlFor="storeUrl"
-                        className="mb-1.5 block text-xs font-medium text-gray-400"
-                      >
-                        Store URL
-                      </label>
-                      <input
-                        id="storeUrl"
-                        required
-                        type="text"
-                        placeholder="brandname.myshopify.com"
-                        value={storeUrl}
-                        onChange={(e) => setStoreUrl(e.target.value)}
-                        className="w-full rounded-lg border border-white/[0.08] bg-black/20 px-3.5 py-2.5 text-sm text-white placeholder:text-gray-600 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                      />
-                    </div>
-
                     <div>
                       <label
                         htmlFor="email"
@@ -244,27 +218,6 @@ export default function WaitlistModal() {
                         onChange={(e) => setEmail(e.target.value)}
                         className="w-full rounded-lg border border-white/[0.08] bg-black/20 px-3.5 py-2.5 text-sm text-white placeholder:text-gray-600 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                       />
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="revenue"
-                        className="mb-1.5 block text-xs font-medium text-gray-400"
-                      >
-                        Estimated Monthly Revenue
-                      </label>
-                      <select
-                        id="revenue"
-                        value={revenue}
-                        onChange={(e) => setRevenue(e.target.value)}
-                        className="w-full rounded-lg border border-white/[0.08] bg-black/20 px-3.5 py-2.5 text-sm text-white outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                      >
-                        {REVENUE_BANDS.map((band) => (
-                          <option key={band} value={band}>
-                            {band}
-                          </option>
-                        ))}
-                      </select>
                     </div>
 
                     {status === "error" && errorMessage && (

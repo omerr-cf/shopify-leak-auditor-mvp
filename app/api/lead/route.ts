@@ -5,29 +5,37 @@ import { getStore } from "@netlify/blobs";
 export const runtime = "nodejs";
 
 type LeadPayload = {
+  email: string;
+  storeUrl?: string;
+  revenue?: string;
+  estimatedLeak?: number;
+};
+
+type LeadRecord = {
   storeUrl: string;
   email: string;
   revenue: string;
-};
-
-type LeadRecord = LeadPayload & {
+  estimatedLeak?: number;
   submittedAt: string;
   referrer: string;
   ip: string;
   queuePosition: number;
 };
 
+// Only email is required now — cold Meta traffic hesitates to hand over an
+// exact .myshopify.com domain, but gives an email freely for instant value.
+// storeUrl/revenue stay accepted (the full Wave 1 modal or a source that has
+// them can still send them) but default to placeholders when absent.
 function isValidLead(body: unknown): body is LeadPayload {
   if (typeof body !== "object" || body === null) return false;
   const b = body as Record<string, unknown>;
-  return (
-    typeof b.storeUrl === "string" &&
-    b.storeUrl.trim().length > 0 &&
-    typeof b.email === "string" &&
-    /^\S+@\S+\.\S+$/.test(b.email) &&
-    typeof b.revenue === "string" &&
-    b.revenue.trim().length > 0
-  );
+  const emailOk =
+    typeof b.email === "string" && /^\S+@\S+\.\S+$/.test(b.email);
+  const storeUrlOk = b.storeUrl === undefined || typeof b.storeUrl === "string";
+  const revenueOk = b.revenue === undefined || typeof b.revenue === "string";
+  const estimatedLeakOk =
+    b.estimatedLeak === undefined || typeof b.estimatedLeak === "number";
+  return emailOk && storeUrlOk && revenueOk && estimatedLeakOk;
 }
 
 function escapeHtml(str: string) {
@@ -43,13 +51,22 @@ function buildEmailHtml(params: {
   storeUrl: string;
   email: string;
   revenue: string;
+  estimatedLeak?: number;
   submittedAt: string;
   referrer: string;
   ip: string;
 }) {
   const rows: Array<[string, string]> = [
-    ["Store URL", params.storeUrl],
     ["Work Email", params.email],
+    ...(typeof params.estimatedLeak === "number"
+      ? ([
+          [
+            "Estimated Monthly Leak",
+            `$${Math.round(params.estimatedLeak).toLocaleString("en-US")}/mo`,
+          ],
+        ] as Array<[string, string]>)
+      : []),
+    ["Store URL", params.storeUrl],
     ["Monthly Revenue", params.revenue],
     ["Submitted", params.submittedAt],
     ["Referrer", params.referrer],
@@ -129,15 +146,14 @@ export async function POST(req: NextRequest) {
 
   if (!isValidLead(body)) {
     return NextResponse.json(
-      {
-        success: false,
-        error: "storeUrl, email, and revenue are all required.",
-      },
+      { success: false, error: "A valid email address is required." },
       { status: 400 }
     );
   }
 
-  const { storeUrl, email, revenue } = body;
+  const { email, estimatedLeak } = body;
+  const storeUrl = body.storeUrl?.trim() || "Not provided (Direct Email Lead)";
+  const revenue = body.revenue?.trim() || "Not provided";
   const submittedAt = new Date().toISOString();
   const referrer = req.headers.get("referer") ?? "unknown";
   const ip =
@@ -152,6 +168,7 @@ export async function POST(req: NextRequest) {
     storeUrl,
     email,
     revenue,
+    estimatedLeak,
     submittedAt,
     referrer,
     ip,
@@ -183,12 +200,19 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  const subject =
+    typeof estimatedLeak === "number"
+      ? `🔥 Hot Shopify Lead: ${email} (Est. Leak: $${Math.round(
+          estimatedLeak
+        ).toLocaleString("en-US")}/mo)`
+      : `🔥 New Shopify Store Lead: ${email} (${revenue})`;
+
   try {
     const resend = new Resend(apiKey);
     const { error } = await resend.emails.send({
       from: fromEmail,
       to: notifyEmail,
-      subject: `🔥 New Shopify Store Lead: ${storeUrl} (${revenue})`,
+      subject,
       html: buildEmailHtml(leadRecord),
       reply_to: email,
     });
