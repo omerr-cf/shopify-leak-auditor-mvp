@@ -3,8 +3,36 @@
 import { motion } from "framer-motion";
 import { MousePointerClick, ShieldCheck } from "lucide-react";
 import InstallForm from "./InstallForm";
-import LottieSlot from "./LottieSlot";
 import RadarScan from "./RadarScan";
+
+// Large ambient background rings, pure CSS (Tailwind's animate-ping),
+// replacing what used to be a lottie-react animation here. That Lottie
+// JSON itself was tiny (39KB, 3 layers) and fetched async/non-blocking,
+// so it was never really "starving the main thread" -- but lottie-react +
+// lottie-web are a genuinely heavy dependency to ship just for ambient
+// texture, and removing them from Hero's client bundle does shave real
+// weight off the JS this section needs before it hydrates. Zero network
+// fetch, zero JS execution cost, runs entirely on the compositor thread.
+function RadarBackdrop() {
+  const rings = [0, 1, 2, 3];
+  return (
+    <div className="relative flex h-[480px] w-[480px] items-center justify-center sm:h-[640px] sm:w-[640px]">
+      {rings.map((i) => (
+        <span
+          key={i}
+          className="absolute rounded-full border border-emerald-500/25 bg-emerald-500/[0.03] animate-ping"
+          style={{
+            height: `${22 + i * 20}%`,
+            width: `${22 + i * 20}%`,
+            animationDelay: `${i * 700}ms`,
+            animationDuration: "3.5s",
+          }}
+        />
+      ))}
+      <span className="absolute h-[8%] w-[8%] rounded-full bg-emerald-400/60 blur-[2px]" />
+    </div>
+  );
+}
 
 export default function Hero() {
   return (
@@ -14,22 +42,13 @@ export default function Hero() {
       <div className="pointer-events-none absolute right-0 top-24 h-[380px] w-[560px] rounded-full bg-cyan-500/[0.06] blur-[110px]" />
 
       {/*
-        LOTTIE SLOT #1 — "hero-scan" (background placement)
-        Live: public/lottie/hero-scan.json (recolored to the site's emerald
-        palette). Sits behind all the hero copy, faded via opacity + a wide
-        radial mask so it reads as ambient texture filling the section
-        rather than a literal icon. Speed is slowed to 0.55x — the source
-        file plays fast by default and reads jittery at this size.
-        fallback is null — nothing renders until the fetch resolves, which
-        is fine since it's a background flourish, not content.
+        Ambient background texture. Used to be a Lottie animation
+        (public/lottie/hero-scan.json) — swapped for a pure-CSS pulsing
+        radar so this section carries zero extra JS weight or network
+        fetch on the path to becoming interactive.
       */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden opacity-[0.16] [mask-image:radial-gradient(ellipse_85%_80%_at_50%_35%,#000_45%,transparent_92%)] sm:opacity-[0.22]">
-        <LottieSlot
-          src="/lottie/hero-scan.json"
-          fallback={null}
-          speed={0.55}
-          className="w-[900px] max-w-none sm:w-[1200px] lg:w-[1500px] xl:w-[1700px]"
-        />
+        <RadarBackdrop />
       </div>
 
       <div className="relative mx-auto max-w-4xl px-4 pb-16 pt-16 text-center sm:px-6 sm:pb-20 sm:pt-24">
@@ -68,16 +87,25 @@ export default function Hero() {
           before your coffee gets cold.
         </motion.p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-9 flex flex-col items-center gap-3"
-        >
+        {/*
+          Deliberately a plain div, NOT motion.div. Everything else in this
+          section fades in via framer-motion's initial={{opacity:0}} ->
+          animate={{opacity:1}}, which server-renders at opacity:0 and only
+          flips once React hydrates client-side. Verified directly against
+          the live production build: the fade-in wrapper this used to be
+          sat at computed opacity:0 for a real, multi-second window after
+          document.readyState was already "complete" -- i.e. the shop-input
+          CTA was invisible and effectively unusable until hydration caught
+          up, independent of the Lottie/JSON question raised separately.
+          This is the one interactive element on the page, so it always
+          renders at full opacity and is clickable/focusable from first
+          paint, decorative fade-ins or not.
+        */}
+        <div className="mt-9 flex flex-col items-center gap-3">
           <div className="w-full max-w-md">
             <InstallForm
-              inputClassName="w-full rounded-xl border border-white/[0.1] bg-black/30 px-4 py-3.5 text-sm text-white placeholder:text-gray-600 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 sm:flex-1"
-              buttonClassName="flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-6 py-3.5 text-sm font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_30px_-10px_rgba(16,185,129,0.45)] transition hover:from-emerald-300 hover:to-emerald-400"
+              inputClassName="w-full rounded-xl border border-white/[0.1] bg-black/30 px-4 py-3.5 text-sm text-white placeholder:text-gray-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none sm:flex-1"
+              buttonClassName="flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-6 py-3.5 text-sm font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_30px_-10px_rgba(16,185,129,0.45)] transition-all hover:from-emerald-300 hover:to-emerald-400 active:scale-[0.98]"
             />
           </div>
 
@@ -95,7 +123,7 @@ export default function Hero() {
               1-click uninstall
             </span>
           </div>
-        </motion.div>
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 16 }}
