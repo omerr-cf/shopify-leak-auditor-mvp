@@ -1,8 +1,8 @@
 "use client";
 
+import { PRODUCTION_APP_ROOT_URL } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Check, X } from "lucide-react";
-import { useModal } from "./ModalProvider";
 
 const ROWS = [
   {
@@ -38,8 +38,6 @@ const ROWS = [
 ];
 
 export default function Comparison() {
-  const { openModal } = useModal();
-
   return (
     <section className="border-b border-line/60 bg-panel/40">
       <div className="mx-auto max-w-4xl px-4 py-20 sm:px-6">
@@ -51,8 +49,8 @@ export default function Comparison() {
             LeakAudit vs. Legacy Profit Apps
           </h2>
           <p className="mt-3 text-gray-400">
-            We built this after reading hundreds of 1-star reviews on
-            BeProfit and Lifetimely. Here&apos;s what we fixed.
+            We built this after reading hundreds of 1-star reviews on BeProfit
+            and Lifetimely. Here&apos;s what we fixed.
           </p>
         </div>
 
@@ -85,11 +83,17 @@ export default function Comparison() {
                 {row.label}
               </div>
               <div className="flex items-center justify-center gap-2 border-x border-line bg-emerald-500/[0.04] p-4 text-center text-xs font-semibold text-white sm:text-sm">
-                <Check className="h-4 w-4 shrink-0 text-emerald-400" strokeWidth={2} />
+                <Check
+                  className="h-4 w-4 shrink-0 text-emerald-400"
+                  strokeWidth={2}
+                />
                 {row.us}
               </div>
               <div className="flex items-center justify-center gap-2 p-4 text-center text-xs text-gray-500 sm:text-sm">
-                <X className="h-4 w-4 shrink-0 text-red-500/70" strokeWidth={2} />
+                <X
+                  className="h-4 w-4 shrink-0 text-red-500/70"
+                  strokeWidth={2}
+                />
                 {row.them}
               </div>
             </div>
@@ -97,12 +101,12 @@ export default function Comparison() {
         </motion.div>
 
         <div className="mt-10 text-center">
-          <button
-            onClick={openModal}
-            className="rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-7 py-3.5 text-sm font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:from-emerald-300 hover:to-emerald-400"
+          <a
+            href={PRODUCTION_APP_ROOT_URL}
+            className="inline-block rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-7 py-3.5 text-sm font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:from-emerald-300 hover:to-emerald-400"
           >
             See the Difference on My Store →
-          </button>
+          </a>
         </div>
       </div>
     </section>

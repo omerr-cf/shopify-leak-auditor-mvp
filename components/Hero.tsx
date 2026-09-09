@@ -1,14 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CreditCard, ShieldCheck, MousePointerClick } from "lucide-react";
-import { useModal } from "./ModalProvider";
-import RadarScan from "./RadarScan";
+import { MousePointerClick, ShieldCheck } from "lucide-react";
+import InstallForm from "./InstallForm";
 import LottieSlot from "./LottieSlot";
+import RadarScan from "./RadarScan";
 
 export default function Hero() {
-  const { openModal } = useModal();
-
   return (
     <section className="mesh-bg relative overflow-hidden border-b border-line/60">
       <div className="bg-grid pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_40%,transparent_100%)]" />
@@ -43,8 +41,7 @@ export default function Hero() {
         >
           <span className="h-1.5 w-1.5 animate-pulse-slow rounded-full bg-red-500" />
           The Average $50K/mo Shopify Store Loses{" "}
-          <span className="font-mono font-medium">$847/mo</span> to Silent
-          Leaks
+          <span className="font-mono font-medium">$847/mo</span> to Silent Leaks
         </motion.div>
 
         <motion.h1
@@ -77,15 +74,12 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-9 flex flex-col items-center gap-3"
         >
-          <motion.button
-            onClick={openModal}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-7 py-4 text-base font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_30px_-10px_rgba(16,185,129,0.45)] transition hover:from-emerald-300 hover:to-emerald-400"
-          >
-            <CreditCard className="h-5 w-5" strokeWidth={2} />
-            Run 60-Second Store Audit — Free
-          </motion.button>
+          <div className="w-full max-w-md">
+            <InstallForm
+              inputClassName="w-full rounded-xl border border-white/[0.1] bg-black/30 px-4 py-3.5 text-sm text-white placeholder:text-gray-600 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 sm:flex-1"
+              buttonClassName="flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-6 py-3.5 text-sm font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_30px_-10px_rgba(16,185,129,0.45)] transition hover:from-emerald-300 hover:to-emerald-400"
+            />
+          </div>
 
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-xs text-gray-500">
             <span className="flex items-center gap-1.5">

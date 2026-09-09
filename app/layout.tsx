@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
-import "@fontsource/fraunces/500.css";
-import "@fontsource/fraunces/600.css";
 import "@fontsource/fraunces/500-italic.css";
+import "@fontsource/fraunces/500.css";
 import "@fontsource/fraunces/600-italic.css";
+import "@fontsource/fraunces/600.css";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
+import type { Metadata } from "next";
 import "./globals.css";
 
 // Geist ships as local font files (no network fetch at build time). Fraunces
@@ -17,11 +17,35 @@ import "./globals.css";
 // stats) use Geist Mono instead of the body sans — tabular, deliberate,
 // reads as "real data" rather than decorative type.
 
-const siteUrl = "https://leakaudit-mvp.vercel.app";
+// Real production domain confirmed by Gemini/Omer (2026-09-09):
+// https://leakauditb2b.netlify.app/. NEXT_PUBLIC_SITE_URL still overrides it
+// so a future custom domain doesn't require another code change -- just set
+// the env var in Netlify and redeploy.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://leakauditb2b.netlify.app";
 const title =
   "LeakAudit — Find the $400–$1,200/Month Your Shopify Store Is Leaking";
 const description =
   "Connect your Shopify store and see a 1-page Cash Leak Report in 60 seconds. No 2-hour setup, no order-volume pricing cliffs, no bloated dashboards. Read-only, flat pricing, 1-click uninstall.";
+
+// JSON-LD structured data (SoftwareApplication). Deliberately omits
+// aggregateRating / review fields -- there are no real reviews yet, and
+// fabricating one would be exactly the kind of fake social proof already
+// stripped out of the Calculator ticker elsewhere in this codebase.
+const softwareApplicationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "LeakAudit for Shopify",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Shopify",
+  description,
+  url: siteUrl,
+  offers: {
+    "@type": "Offer",
+    price: "49",
+    priceCurrency: "USD",
+  },
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -68,6 +92,13 @@ export default function RootLayout({
         {/* Subtle grain overlay — the single fastest fix for the "flat AI
             gradient" look. Fixed, non-interactive, sits above everything. */}
         <div className="grain-overlay pointer-events-none fixed inset-0 z-[60]" />
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(softwareApplicationJsonLd),
+          }}
+        />
         {children}
       </body>
     </html>

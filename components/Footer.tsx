@@ -1,3 +1,4 @@
+import { PRODUCTION_APP_ROOT_URL } from "@/lib/utils";
 import Logomark from "./Logomark";
 
 export default function Footer() {
@@ -9,9 +10,15 @@ export default function Footer() {
           LeakAudit for Shopify
         </div>
         <p>
-          Read-only Shopify Admin API access only. We never touch your ad
-          spend or your money.
+          Read-only Shopify Admin API access only. We never touch your ad spend
+          or your money.
         </p>
+        <a
+          href={PRODUCTION_APP_ROOT_URL}
+          className="rounded-lg bg-gradient-to-b from-emerald-400 to-emerald-500 px-3.5 py-1.5 text-xs font-semibold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:from-emerald-300 hover:to-emerald-400"
+        >
+          🛍️ Get LeakAudit Free
+        </a>
         <p>&copy; {new Date().getFullYear()} LeakAudit. All rights reserved.</p>
       </div>
     </footer>

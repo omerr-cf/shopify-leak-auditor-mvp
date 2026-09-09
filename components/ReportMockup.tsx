@@ -1,16 +1,16 @@
 "use client";
 
+import { PRODUCTION_APP_ROOT_URL } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
-  Store,
-  CreditCard,
-  PackageX,
-  Gauge,
-  RotateCcw,
-  CheckCircle2,
   ArrowRight,
+  CheckCircle2,
+  CreditCard,
+  Gauge,
+  PackageX,
+  RotateCcw,
+  Store,
 } from "lucide-react";
-import { useModal } from "./ModalProvider";
 import IconTile from "./IconTile";
 import LottieSlot from "./LottieSlot";
 
@@ -82,8 +82,6 @@ const LEAK_CARDS: Array<{
 ];
 
 export default function ReportMockup() {
-  const { openModal } = useModal();
-
   return (
     <section className="border-b border-line/60">
       <div className="mx-auto max-w-4xl px-4 py-20 sm:px-6">
@@ -111,7 +109,8 @@ export default function ReportMockup() {
           <div className="flex items-center justify-between border-b border-line bg-[#111827] px-5 py-3.5">
             <div className="flex items-center gap-2 text-sm font-medium text-gray-300">
               <Store className="h-4 w-4 text-gray-500" strokeWidth={1.75} />
-              Store: <span className="text-white">UrbanAesthetic.myshopify.com</span>
+              Store:{" "}
+              <span className="text-white">UrbanAesthetic.myshopify.com</span>
               <span className="text-gray-600">— Cash Leak Audit</span>
             </div>
             <span className="hidden items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-[11px] text-gray-500 sm:inline-flex">
@@ -164,7 +163,12 @@ export default function ReportMockup() {
               >
                 <div className="mb-2.5 flex items-start justify-between gap-3">
                   <div className="flex items-start gap-2.5">
-                    <IconTile icon={card.icon} tone={card.tone} size="md" className="mt-0.5" />
+                    <IconTile
+                      icon={card.icon}
+                      tone={card.tone}
+                      size="md"
+                      className="mt-0.5"
+                    />
                     <div>
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                         Leak {i + 1} · {card.category}
@@ -179,7 +183,9 @@ export default function ReportMockup() {
                   {card.detail}
                 </p>
                 <div className="flex items-center justify-between">
-                  <span className={`font-mono text-sm font-bold ${TONE_TEXT[card.tone]}`}>
+                  <span
+                    className={`font-mono text-sm font-bold ${TONE_TEXT[card.tone]}`}
+                  >
                     {card.amount}
                   </span>
                   <button className="flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-400 transition hover:bg-emerald-500/20">
@@ -194,17 +200,20 @@ export default function ReportMockup() {
           {/* Green footer */}
           <div className="flex flex-col items-center gap-3 border-t border-emerald-500/20 bg-emerald-500/10 px-6 py-6 text-center sm:flex-row sm:justify-between sm:text-left">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-emerald-400" strokeWidth={1.75} />
+              <CheckCircle2
+                className="h-5 w-5 text-emerald-400"
+                strokeWidth={1.75}
+              />
               <span className="font-mono text-base font-bold text-emerald-400">
                 Money You Can Recover Today: $847.00/mo
               </span>
             </div>
-            <button
-              onClick={openModal}
+            <a
+              href={PRODUCTION_APP_ROOT_URL}
               className="rounded-lg bg-gradient-to-b from-emerald-400 to-emerald-500 px-5 py-2.5 text-sm font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:from-emerald-300 hover:to-emerald-400"
             >
               Get My Real Report →
-            </button>
+            </a>
           </div>
         </motion.div>
       </div>

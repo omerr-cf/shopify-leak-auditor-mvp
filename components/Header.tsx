@@ -1,14 +1,12 @@
 "use client";
 
+import { PRODUCTION_APP_ROOT_URL } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { ShieldCheck, Store } from "lucide-react";
-import { useModal } from "./ModalProvider";
-import Logomark from "./Logomark";
 import IconTile from "./IconTile";
+import Logomark from "./Logomark";
 
 export default function Header() {
-  const { openModal } = useModal();
-
   return (
     <motion.header
       initial={{ y: -24, opacity: 0 }}
@@ -29,12 +27,12 @@ export default function Header() {
           <Badge icon={<ShieldCheck />} label="100% Read-Only & Secure" />
         </div>
 
-        <button
-          onClick={openModal}
+        <a
+          href={PRODUCTION_APP_ROOT_URL}
           className="rounded-lg bg-gradient-to-b from-emerald-400 to-emerald-500 px-3.5 py-2 text-xs font-semibold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:from-emerald-300 hover:to-emerald-400 sm:px-4 sm:text-sm"
         >
-          Check My Store (Free)
-        </button>
+          🛍️ Get LeakAudit Free
+        </a>
       </div>
     </motion.header>
   );

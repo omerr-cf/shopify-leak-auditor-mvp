@@ -1,16 +1,20 @@
-import { ModalProvider } from "@/components/ModalProvider";
-import Header from "@/components/Header";
-import Hero from "@/components/Hero";
 import Calculator from "@/components/Calculator";
-import ReportMockup from "@/components/ReportMockup";
 import Comparison from "@/components/Comparison";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
-import WaitlistModal from "@/components/WaitlistModal";
+import Header from "@/components/Header";
+import Hero from "@/components/Hero";
+import ReportMockup from "@/components/ReportMockup";
 
+// NOTE: ModalProvider / WaitlistModal ("fake door" waitlist queue-position
+// mechanic) were unwired here in favor of real, direct links into the live
+// production app (see lib/utils.ts PRODUCTION_APP_ROOT_URL / buildInstallUrl).
+// The two files are intentionally left on disk, not deleted, in case the
+// waitlist mechanic is wanted again later -- ping Claude before re-wiring
+// them so the shop-domain sanitization/validation isn't duplicated.
 export default function Home() {
   return (
-    <ModalProvider>
+    <>
       <Header />
       <main>
         <Hero />
@@ -20,7 +24,6 @@ export default function Home() {
         <FAQ />
       </main>
       <Footer />
-      <WaitlistModal />
-    </ModalProvider>
+    </>
   );
 }
