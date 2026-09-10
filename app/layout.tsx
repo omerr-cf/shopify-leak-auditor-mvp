@@ -32,11 +32,28 @@ const description =
 // aggregateRating / review fields -- there are no real reviews yet, and
 // fabricating one would be exactly the kind of fake social proof already
 // stripped out of the Calculator ticker elsewhere in this codebase.
+//
+// applicationCategory: verified against Google's Software App structured
+// data docs (developers.google.com/search/docs/appearance/structured-data/
+// software-app) -- this field expects a SINGLE value from Google's fixed
+// list, not a comma-joined string of multiple categories. "FinanceApplication"
+// is the more precise single match (the product audits FX fees, margins and
+// profit -- a financial-analysis tool) vs. the more generic
+// "BusinessApplication" used previously.
+//
+// offers.price: intentionally left at "49", matching the real
+// `shopify.server.ts` billing plan ($49/month flat, currently gated off
+// during the free Founder Beta). Structured data must reflect the actual
+// price a user would be charged -- Google's structured-data guidelines
+// explicitly warn against marking up "irrelevant or misleading content" --
+// so this is NOT switched to "0" even though the app is free right now;
+// "free during a beta" and "the product's real price" are different facts,
+// and only the latter belongs in a permanent Offer schema.
 const softwareApplicationJsonLd = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   name: "LeakAudit for Shopify",
-  applicationCategory: "BusinessApplication",
+  applicationCategory: "FinanceApplication",
   operatingSystem: "Shopify",
   description,
   url: siteUrl,
