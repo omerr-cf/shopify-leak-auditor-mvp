@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { cloneElement } from "react";
 
-type Tone = "emerald" | "amber" | "red" | "cyan" | "neutral";
+type Tone = "emerald" | "amber" | "red" | "cyan" | "rose" | "neutral";
 type Size = "sm" | "md" | "lg";
 
 const TONE_CLASSES: Record<Tone, string> = {
@@ -9,6 +9,7 @@ const TONE_CLASSES: Record<Tone, string> = {
   amber: "border-amber-500/25 bg-amber-500/10 text-amber-400",
   red: "border-red-500/25 bg-red-500/10 text-red-400",
   cyan: "border-cyan-500/25 bg-cyan-500/10 text-cyan-400",
+  rose: "border-rose-500/25 bg-rose-500/10 text-rose-400",
   neutral: "border-white/[0.08] bg-white/[0.04] text-gray-400",
 };
 

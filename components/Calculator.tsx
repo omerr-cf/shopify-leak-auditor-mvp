@@ -1,7 +1,14 @@
 "use client";
 
 import { estimateLeaks, formatUSD } from "@/lib/utils";
-import { CreditCard, Ghost, Package, RotateCcw } from "lucide-react";
+import {
+  Code2,
+  CreditCard,
+  Ghost,
+  Package,
+  RotateCcw,
+  TrendingDown,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import AnimatedNumber from "./AnimatedNumber";
 import IconTile from "./IconTile";
@@ -78,10 +85,10 @@ export default function Calculator() {
           <span className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
             Try it yourself
           </span>
-          <h2 className="mt-3 font-display text-3xl font-medium text-white sm:text-4xl">
+          <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-white sm:text-4xl">
             What Is Your Store Actually Leaking?
           </h2>
-          <p className="mt-3 text-gray-400">
+          <p className="mt-3 leading-relaxed text-gray-400">
             Drag the sliders to match your store. This is a rough estimate —
             your real audit connects live data and gets specific.
           </p>
@@ -108,38 +115,40 @@ export default function Calculator() {
         <div className="mx-auto mb-10 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">
           {[
             {
-              emoji: "💳",
+              icon: <CreditCard />,
+              tone: "emerald" as const,
               title: "Hidden FX & Gateway Drag",
               subtitle: "1.8% average markup",
             },
             {
-              emoji: "👻",
+              icon: <Code2 />,
+              tone: "cyan" as const,
               title: "Leftover Theme App Scripts",
               subtitle: "Uninstalled bloat",
             },
             {
-              emoji: "📦",
+              icon: <TrendingDown />,
+              tone: "amber" as const,
               title: "Negative-Margin SKUs",
               subtitle: "Post-shipping loss",
             },
             {
-              emoji: "🔄",
+              icon: <RotateCcw />,
+              tone: "rose" as const,
               title: "Silent Return Rate Drift",
               subtitle: "",
             },
           ].map((vector) => (
             <div
               key={vector.title}
-              className="glass-panel flex flex-col items-center gap-1.5 rounded-xl border border-white/[0.08] px-3 py-4 text-center"
+              className="glass-panel flex flex-col items-center gap-1.5 rounded-xl border border-white/[0.08] px-3 py-4 text-center transition-colors duration-300 hover:border-white/[0.16]"
             >
-              <span className="text-2xl" aria-hidden>
-                {vector.emoji}
-              </span>
+              <IconTile icon={vector.icon} tone={vector.tone} size="md" />
               <span className="text-xs font-semibold leading-tight text-white">
                 {vector.title}
               </span>
               {vector.subtitle && (
-                <span className="text-[11px] leading-tight text-gray-500">
+                <span className="text-[11px] leading-tight text-gray-400">
                   {vector.subtitle}
                 </span>
               )}
@@ -181,7 +190,7 @@ export default function Calculator() {
 
           {/* Output */}
           <div className="glass-panel flex flex-col justify-center rounded-xl p-6 sm:p-8">
-            <p className="text-center text-xs font-medium uppercase tracking-wide text-gray-500">
+            <p className="text-center text-xs font-medium uppercase tracking-wider text-gray-400">
               Estimated Monthly Cash Leak
             </p>
             <div className="my-3 text-center">
@@ -233,8 +242,8 @@ export default function Calculator() {
               <InstallForm
                 stacked
                 buttonLabel="⚡ Reveal & Audit My Store Leaks (Free) ↗"
-                inputClassName="w-full rounded-lg border border-white/[0.1] bg-black/30 px-3.5 py-3 text-sm text-white placeholder:text-gray-600 outline-none transition focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-                buttonClassName="w-full rounded-lg bg-gradient-to-b from-emerald-400 to-emerald-500 py-3.5 text-sm font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:from-emerald-300 hover:to-emerald-400"
+                inputClassName="min-h-[48px] w-full rounded-lg border border-white/[0.1] bg-black/30 px-3.5 py-3 text-sm text-white placeholder:text-gray-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                buttonClassName="min-h-[48px] w-full rounded-lg bg-gradient-to-b from-emerald-400 to-emerald-500 py-3.5 text-sm font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition-all hover:from-emerald-300 hover:to-emerald-400 active:scale-[0.98]"
               />
             </div>
           </div>

@@ -104,12 +104,12 @@ export default function Hero() {
         <div className="mt-9 flex flex-col items-center gap-3">
           <div className="w-full max-w-md">
             <InstallForm
-              inputClassName="w-full rounded-xl border border-white/[0.1] bg-black/30 px-4 py-3.5 text-sm text-white placeholder:text-gray-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none sm:flex-1"
-              buttonClassName="flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-6 py-3.5 text-sm font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_30px_-10px_rgba(16,185,129,0.45)] transition-all hover:from-emerald-300 hover:to-emerald-400 active:scale-[0.98]"
+              inputClassName="min-h-[48px] w-full rounded-xl border border-white/[0.1] bg-black/30 px-4 py-3.5 text-sm text-white placeholder:text-gray-600 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 focus:outline-none sm:flex-1"
+              buttonClassName="flex min-h-[48px] w-full shrink-0 items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-6 py-3.5 text-sm font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_30px_-10px_rgba(16,185,129,0.45)] transition-all hover:from-emerald-300 hover:to-emerald-400 active:scale-[0.98] sm:w-auto"
             />
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-xs text-gray-500">
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-xs text-gray-400">
             <span className="flex items-center gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5" strokeWidth={1.75} />
               Zero credit card required

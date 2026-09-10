@@ -29,7 +29,7 @@ export default function FAQ() {
           <span className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
             Before you ask
           </span>
-          <h2 className="mt-3 font-display text-3xl font-medium text-white sm:text-4xl">
+          <h2 className="mt-3 font-display text-3xl font-medium tracking-tight text-white sm:text-4xl">
             Common Questions
           </h2>
         </div>
