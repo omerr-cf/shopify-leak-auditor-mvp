@@ -1,6 +1,6 @@
 "use client";
 
-import { PRODUCTION_APP_ROOT_URL } from "@/lib/utils";
+import { APP_STORE_LISTING_URL } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Check, X } from "lucide-react";
 
@@ -102,7 +102,7 @@ export default function Comparison() {
 
         <div className="mt-10 text-center">
           <a
-            href={PRODUCTION_APP_ROOT_URL}
+            href={APP_STORE_LISTING_URL}
             className="inline-block rounded-xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-7 py-3.5 text-sm font-bold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:from-emerald-300 hover:to-emerald-400"
           >
             See the Difference on My Store →

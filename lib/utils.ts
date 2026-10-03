@@ -85,3 +85,22 @@ export function buildInstallUrl(sanitizedShop: string): string {
 }
 
 export const PRODUCTION_APP_ROOT_URL = PRODUCTION_APP_URL;
+
+/**
+ * Official, published Shopify App Store listing (approved & live as of
+ * 2026-10-01). Used for generic/non-personalized "learn more" CTAs
+ * (header, footer, comparison section, report mockup) that don't already
+ * carry a specific merchant's shop domain -- landing on an
+ * apps.shopify.com URL is a stronger trust signal for those than the bare
+ * fly.dev app root, which isn't a page a visitor would otherwise see.
+ *
+ * Deliberately NOT used by InstallForm/buildInstallUrl (Hero, Calculator)
+ * or the outbound email engine's buildInstallLink: those already build a
+ * personalized `/auth?shop=<their-domain>` URL that drops a merchant
+ * straight into Shopify's real OAuth screen with their store pre-filled.
+ * Routing those to the generic listing instead would remove that
+ * pre-fill and add a step (merchant has to find/select their store
+ * again on Shopify's side) -- a conversion regression, not an
+ * improvement, despite looking like the more "official" link.
+ */
+export const APP_STORE_LISTING_URL = "https://apps.shopify.com/leakaudit-app";

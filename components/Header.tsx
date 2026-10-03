@@ -1,6 +1,6 @@
 "use client";
 
-import { PRODUCTION_APP_ROOT_URL } from "@/lib/utils";
+import { APP_STORE_LISTING_URL } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { ShieldCheck, Store } from "lucide-react";
 import IconTile from "./IconTile";
@@ -28,7 +28,7 @@ export default function Header() {
         </div>
 
         <a
-          href={PRODUCTION_APP_ROOT_URL}
+          href={APP_STORE_LISTING_URL}
           className="rounded-lg bg-gradient-to-b from-emerald-400 to-emerald-500 px-3.5 py-2 text-xs font-semibold text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] transition hover:from-emerald-300 hover:to-emerald-400 sm:px-4 sm:text-sm"
         >
           🛍️ Get LeakAudit Free
