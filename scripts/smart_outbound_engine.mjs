@@ -1211,7 +1211,7 @@ async function runSelftest() {
     domain: "coolthreads.com",
     hasCrossBorder: true,
     physicalAddress: "123 Main St, Anytown, ST 00000",
-    installLink: "https://leakaudit-app.fly.dev/auth?shop=coolthreads.com",
+    installLink: "https://apps.shopify.com/leakaudit-app?utm_source=outbound&utm_medium=email&utm_campaign=cold_oct",
     includeFounderBeta: false,
   });
   check("buildPersonalizedDraft (cross-border) mentions currency, not a fabricated dollar figure", crossBorderDraft.body.includes("currency"));
@@ -1224,7 +1224,7 @@ async function runSelftest() {
     domain: "coolthreads.com",
     hasCrossBorder: false,
     physicalAddress: "123 Main St, Anytown, ST 00000",
-    installLink: "https://leakaudit-app.fly.dev/auth?shop=coolthreads.com",
+    installLink: "https://apps.shopify.com/leakaudit-app?utm_source=outbound&utm_medium=email&utm_campaign=cold_oct",
     includeFounderBeta: false,
   });
   check(
@@ -1240,7 +1240,7 @@ async function runSelftest() {
 
   check(
     "buildPersonalizedDraft uses the arrow-CTA line with the real install link (2026-09-10 polish)",
-    crossBorderDraft.body.includes("👉 Run your store's 60-second audit: https://leakaudit-app.fly.dev/auth?shop=coolthreads.com")
+    crossBorderDraft.body.includes("👉 Run your store's 60-second audit: https://apps.shopify.com/leakaudit-app?utm_source=outbound&utm_medium=email&utm_campaign=cold_oct")
   );
   check(
     "buildPersonalizedDraft includes the named founder sign-off (2026-09-10 polish)",
@@ -1263,7 +1263,7 @@ async function runSelftest() {
     domain: "coolthreads.com",
     hasCrossBorder: false,
     physicalAddress: "123 Main St, Anytown, ST 00000",
-    installLink: "https://leakaudit-app.fly.dev/auth?shop=coolthreads.com",
+    installLink: "https://apps.shopify.com/leakaudit-app?utm_source=outbound&utm_medium=email&utm_campaign=cold_oct",
     includeFounderBeta: true,
   });
   check(
@@ -1291,7 +1291,7 @@ async function runSelftest() {
       contactEmail: "hello@coolthreads.com",
       personalizedSubject: "Quick question about Cool Threads's international orders",
       personalizedBody: "line one\nline two, with a comma",
-      installLink: "https://leakaudit-app.fly.dev/auth?shop=coolthreads.com",
+      installLink: "https://apps.shopify.com/leakaudit-app?utm_source=outbound&utm_medium=email&utm_campaign=cold_oct",
     },
   ]);
   check("toCsvRows includes the exact 9-column header, Shop URL/Email/Status/Subject/Body first", csv.startsWith("Shop URL,Email,Status,Personalized Subject,Personalized Body,Store Name,Product Count,Detected Leaks,Install Link"));
@@ -1389,7 +1389,7 @@ async function runSelftest() {
       domain: "coolthreads.com",
       hasCrossBorder: false,
       physicalAddress: "LeakAudit, P.O. Box 42, Nes Harim, Israel",
-      installLink: "https://leakaudit-app.fly.dev/auth?shop=coolthreads.com",
+      installLink: "https://apps.shopify.com/leakaudit-app?utm_source=outbound&utm_medium=email&utm_campaign=cold_oct",
       includeFounderBeta: false,
     }).body.includes("LeakAudit\nLeakAudit")
   );
@@ -1424,7 +1424,7 @@ async function runSelftest() {
       domain: "coolthreads.com",
       hasCrossBorder: false,
       physicalAddress: "123 Main St, Anytown, ST 00000",
-      installLink: "https://leakaudit-app.fly.dev/auth?shop=coolthreads.com",
+      installLink: "https://apps.shopify.com/leakaudit-app?utm_source=outbound&utm_medium=email&utm_campaign=cold_oct",
       includeFounderBeta: false,
       contactEmail: "heather@coolthreads.com",
     }).body.startsWith("Hi Heather,")
@@ -1436,7 +1436,7 @@ async function runSelftest() {
       domain: "coolthreads.com",
       hasCrossBorder: false,
       physicalAddress: "123 Main St, Anytown, ST 00000",
-      installLink: "https://leakaudit-app.fly.dev/auth?shop=coolthreads.com",
+      installLink: "https://apps.shopify.com/leakaudit-app?utm_source=outbound&utm_medium=email&utm_campaign=cold_oct",
       includeFounderBeta: false,
       contactEmail: "info@coolthreads.com",
     }).body.startsWith("Hi Cool Threads team,")
@@ -1511,7 +1511,7 @@ async function runSelftest() {
     const withBeta = buildFollowUpDraft({
       storeName: "Cool Threads",
       contactEmail: "heather@coolthreads.com",
-      installLink: "https://leakaudit-app.fly.dev/auth?shop=coolthreads.com",
+      installLink: "https://apps.shopify.com/leakaudit-app?utm_source=outbound&utm_medium=email&utm_campaign=cold_oct",
       physicalAddress: "LeakAudit, P.O. Box 42, Nes Harim, Israel",
       initialSubject: "Quick question about Cool Threads's margins",
       includeFounderBetaLine: true,
@@ -1524,12 +1524,12 @@ async function runSelftest() {
       withBeta.body.includes("P.O. Box 42, Nes Harim, Israel")
     );
     check("buildFollowUpDraft always includes an opt-out instruction (CAN-SPAM)", /reply stop/i.test(withBeta.body));
-    check("buildFollowUpDraft includes the real install link", withBeta.body.includes("https://leakaudit-app.fly.dev/auth?shop=coolthreads.com"));
+    check("buildFollowUpDraft includes the real install link", withBeta.body.includes("https://apps.shopify.com/leakaudit-app?utm_source=outbound&utm_medium=email&utm_campaign=cold_oct"));
 
     const withoutBeta = buildFollowUpDraft({
       storeName: "Cool Threads",
       contactEmail: "info@coolthreads.com",
-      installLink: "https://leakaudit-app.fly.dev/auth?shop=coolthreads.com",
+      installLink: "https://apps.shopify.com/leakaudit-app?utm_source=outbound&utm_medium=email&utm_campaign=cold_oct",
       physicalAddress: "123 Main St, Anytown, ST 00000",
       initialSubject: "Quick question about Cool Threads's margins",
       includeFounderBetaLine: false,

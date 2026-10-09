@@ -11,3 +11,10 @@ _sync_update.zip
 # Local Netlify folder
 .netlify
 tsconfig.tsbuildinfo
+
+# Lead-gen script outputs -- contain real store domains/emails, never commit
+suppression_list.json
+already_contacted.json
+qualified_smb_leads.json
+qualified_smb_leads.csv
+rejected_domains.json
