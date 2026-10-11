@@ -513,11 +513,11 @@ function buildPersonalizedDraft({
     : `Quick question about ${storeName}'s margins`;
 
   const firstName = extractFirstNameFromEmail(contactEmail);
-  const salutation = firstName ? `Hi ${firstName},` : `Hi ${storeName} team,`;
+  const salutation = firstName ? `Hi ${firstName},` : `Hi there,`;
 
   const pitchParagraph = hasCrossBorder
-    ? `I ran a quick, read-only scan of ${domain} and noticed you're set up to sell in more than one currency. Cross-border Shopify stores often lose 1-2% of every international order to currency-conversion markup buried in payment-gateway fees -- money that never shows up as its own line item, so most merchants never see it directly.`
-    : `A few of the most common blind spots we see on independent Shopify stores are negative-margin SKUs (products that quietly lose money once shipping is factored in) and leftover app scripts from tools that got uninstalled but never fully removed -- both invisible unless you go looking.`;
+    ? `I ran a quick, read-only scan of ${domain} and noticed you're set up to sell in more than one currency. Cross-border Shopify stores often lose 1-2% of every international order to currency-conversion markup buried in payment-gateway fees -- money that never shows up as its own line item, so most merchants never see it directly.\n\nDo you know how much of your international revenue goes to that markup?`
+    : `A few of the most common blind spots we see on independent Shopify stores are negative-margin SKUs (products that quietly lose money once shipping is factored in) and leftover app scripts from tools that got uninstalled but never fully removed -- both invisible unless you go looking.\n\nDo you know which of your products lose money after shipping?`;
 
   // 2026-10-03: reworded away from "free, for life, IN EXCHANGE FOR ... a
   // review" after confirming Shopify's App Store Requirements 1.3 ("Always
@@ -539,7 +539,7 @@ ${pitchParagraph}
 
 LeakAudit is a free, read-only Shopify app that scans a store in about 60 seconds and shows exactly where leaks like that might be hiding for your specific store -- no spreadsheets, no manual setup, nothing to configure. It only reads data Shopify already gives it.${founderBetaParagraph}
 
-👉 Run your store's 60-second audit: ${installLink}
+Run your store's 60-second audit: ${installLink}
 
 Best,
 Omer | Founder, LeakAudit
@@ -565,7 +565,7 @@ function buildFollowUpDraft({ storeName, contactEmail, installLink, physicalAddr
   const subject = `Re: ${initialSubject}`;
 
   const firstName = extractFirstNameFromEmail(contactEmail);
-  const salutation = firstName ? `Hi ${firstName},` : `Hi ${storeName} team,`;
+  const salutation = firstName ? `Hi ${firstName},` : `Hi there,`;
 
   const ctaIntro = includeFounderBetaLine
     ? `We're still holding a spot for ${storeName} in our Founder Beta (100% free, for life) if you'd like to run a 60-second audit on your store:`
@@ -576,7 +576,7 @@ function buildFollowUpDraft({ storeName, contactEmail, installLink, physicalAddr
 Just wanted to quickly follow up on my note from a few days ago, in case it got buried under new orders.
 
 ${ctaIntro}
-👉 ${installLink}
+${installLink}
 
 Best,
 Omer | Founder, LeakAudit
@@ -1240,7 +1240,7 @@ async function runSelftest() {
 
   check(
     "buildPersonalizedDraft uses the arrow-CTA line with the real install link (2026-09-10 polish)",
-    crossBorderDraft.body.includes("👉 Run your store's 60-second audit: https://apps.shopify.com/leakaudit-app?utm_source=outbound&utm_medium=email&utm_campaign=cold_oct")
+    crossBorderDraft.body.includes("Run your store's 60-second audit: https://apps.shopify.com/leakaudit-app?utm_source=outbound&utm_medium=email&utm_campaign=cold_oct")
   );
   check(
     "buildPersonalizedDraft includes the named founder sign-off (2026-09-10 polish)",
@@ -1439,7 +1439,7 @@ async function runSelftest() {
       installLink: "https://apps.shopify.com/leakaudit-app?utm_source=outbound&utm_medium=email&utm_campaign=cold_oct",
       includeFounderBeta: false,
       contactEmail: "info@coolthreads.com",
-    }).body.startsWith("Hi Cool Threads team,")
+    }).body.startsWith("Hi there,")
   );
 
   {
@@ -1534,7 +1534,7 @@ async function runSelftest() {
       initialSubject: "Quick question about Cool Threads's margins",
       includeFounderBetaLine: false,
     });
-    check("buildFollowUpDraft falls back to the team greeting for a generic contact email", withoutBeta.body.startsWith("Hi Cool Threads team,"));
+    check("buildFollowUpDraft falls back to the team greeting for a generic contact email", withoutBeta.body.startsWith("Hi there,"));
     check(
       "buildFollowUpDraft never mentions a Founder Beta spot when the original email didn't include one (never retracts or invents an offer)",
       !/founder beta/i.test(withoutBeta.body)
