@@ -201,6 +201,39 @@ const DEFAULT_DORK_QUERIES = [
   '"powered by shopify" "contact us" boutique swimwear resortwear -site:shopify.com',
 ];
 
+// 2026-10-11: discovery had dried up -- the 11 queries above only ever
+// return the same ~110 domains, all already in the master list, so every
+// repeat run found nothing new. These niches are physical-goods stores
+// that ship orders (so shipping/fee/margin leaks are real for them), the
+// sweet spot for LeakAudit. Combined with --pages (Serper result pages
+// 2..N) this multiplies the candidate pool by ~15-30x. The product-count
+// (8-200) and live-Shopify checks in qualifyDomain still apply to each.
+const EXTRA_NICHES = [
+  "organic supplements vitamins", "protein snacks", "gourmet hot sauce", "craft chocolate",
+  "raw honey", "spices seasoning", "handmade soap", "natural deodorant",
+  "haircare shampoo", "makeup cosmetics", "nail polish", "perfume fragrance oils",
+  "mens grooming beard", "activewear yoga leggings", "streetwear hoodies", "socks",
+  "hats caps beanies", "sunglasses", "watches", "wallets cardholders",
+  "backpacks travel bags", "sneakers shoes", "sandals", "lingerie sleepwear",
+  "plus size clothing", "maternity clothing", "wooden toys", "baby accessories",
+  "dog collars leashes", "cat toys", "dog treats", "outdoor camping gear",
+  "fishing gear", "hiking gear", "cycling accessories", "surf skate",
+  "gaming accessories", "phone cases", "stationery desk accessories", "planners journals",
+  "art prints posters", "wall art", "furniture", "rugs",
+  "bedding linen", "kitchenware", "ceramics tableware", "plants planters",
+  "garden tools", "knives cutlery", "water bottles tumblers", "essential oils diffusers",
+  "incense crystals", "wedding party supplies", "gift sets", "embroidery patches",
+  "yarn knitting", "fabric sewing supplies", "beads jewelry making", "board games puzzles",
+  "lamps lighting", "car accessories", "yoga mats fitness equipment", "tea accessories",
+];
+
+function buildNicheQuery(niche) {
+  return `"powered by shopify" "contact us" ${niche} -site:shopify.com`;
+}
+
+// Existing 11 first (page 2+ of them is new ground), then the new niches.
+const ALL_DORK_QUERIES = [...DEFAULT_DORK_QUERIES, ...EXTRA_NICHES.map(buildNicheQuery)];
+
 const SERPER_ENDPOINT = "https://google.serper.dev/search";
 const BRAVE_ENDPOINT = "https://api.search.brave.com/res/v1/web/search";
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
@@ -235,7 +268,7 @@ const DEFAULT_REJECTED_DOMAINS_PATH = "rejected_domains.json";
  * make it obvious immediately if that field name is wrong (0 URLs
  * extracted from a 200 response with a non-trivial body).
  */
-async function searchSerper(query, apiKey, num = 10) {
+async function searchSerper(query, apiKey, num = 10, page = 1) {
   const resp = await fetch(SERPER_ENDPOINT, {
     method: "POST",
     headers: {
@@ -243,7 +276,7 @@ async function searchSerper(query, apiKey, num = 10) {
       "Content-Type": "application/json",
       "User-Agent": USER_AGENT,
     },
-    body: JSON.stringify({ q: query, num }),
+    body: JSON.stringify({ q: query, num, ...(page > 1 ? { page } : {}) }),
   });
   const bodyText = await resp.text();
   let json = null;
@@ -256,7 +289,7 @@ async function searchSerper(query, apiKey, num = 10) {
   const urls = organic.map((r) => r?.link).filter((link) => typeof link === "string");
 
   console.log(
-    `  [${query}] Status: ${resp.status}, body length: ${bodyText.length} bytes, organic results: ${organic.length}, URLs: ${urls.length}`
+    `  [${query}${page > 1 ? ` (page ${page})` : ""}] Status: ${resp.status}, body length: ${bodyText.length} bytes, organic results: ${organic.length}, URLs: ${urls.length}`
   );
   if (!resp.ok) {
     console.warn(`  [warn] Serper returned HTTP ${resp.status} for ${JSON.stringify(query)}: ${bodyText.slice(0, 200)}`);
@@ -508,9 +541,14 @@ function buildPersonalizedDraft({
   includeFounderBeta,
   contactEmail,
 }) {
-  const subject = hasCrossBorder
+  let subject = hasCrossBorder
     ? `Quick question about ${storeName}'s international orders`
     : `Quick question about ${storeName}'s margins`;
+  // Long store names push the subject past ~70 chars, where inboxes cut it off (and the
+  // agent-hq Reviewer warns). Fall back to a shorter wording without the name.
+  if (subject.length > 70) {
+    subject = hasCrossBorder ? "Quick question about your international orders" : "Quick question about your store's margins";
+  }
 
   const firstName = extractFirstNameFromEmail(contactEmail);
   const salutation = firstName ? `Hi ${firstName},` : `Hi there,`;
@@ -687,6 +725,49 @@ async function saveRejectedDomains(path, map) {
 // without spending another homepage/products.json fetch on it. The one
 // exception is the very first check: an unparseable domain has nothing
 // valid to key the cache on, so it's just dropped, not cached.
+// 2026-10-11: the first big discovery run (80 new leads) showed what a
+// raw page scrape picks up as a "contact email": Sentry ingest addresses,
+// "your@email.com" placeholders, URL-encoded non-breaking spaces
+// ("%C2%A0info@..."), digit-glued postal codes ("98107info@..."), a Shopify
+// agency's address, role mailboxes like payments@/orders@, and free-mail
+// addresses on theme-demo *.myshopify.com stores. Emailing any of those
+// wastes sends and hurts sender reputation (bounces/spam complaints), so
+// every address passes through here before it can reach a lead. Returns
+// the cleaned lower-case address, or null if it should not be emailed.
+const BAD_EMAIL_DOMAIN_PATTERNS = [
+  /sentry/i, /ingest\./i, /wixpress\.com$/i, /(^|\.)shopify\.com$/i, /(^|\.)myshopify\.com$/i,
+  /^example\./i, /^email\.com$/i, /^domain\.com$/i, /^yourdomain\./i, /giftnote\.com$/i,
+  /bsscommerce\.com$/i, /zipify\.com$/i,
+];
+const BAD_EMAIL_LOCAL_PARTS = new Set([
+  "payments", "payment", "billing", "invoice", "invoices", "orders", "order", "noreply", "no-reply",
+  "donotreply", "do-not-reply", "privacy", "legal", "abuse", "postmaster", "webmaster", "careers",
+  "jobs", "recipient", "your", "you", "name", "yourname", "user", "test", "example", "email",
+]);
+
+function sanitizeContactEmail(raw, storeDomain) {
+  if (!raw || typeof raw !== "string") return null;
+  let e = raw;
+  try {
+    e = decodeURIComponent(e);
+  } catch {
+    // not URL-encoded -- keep as is
+  }
+  e = e.replace(/[\u00a0\u200b\s]+/g, "").toLowerCase();
+  if (!/^[a-z0-9._%+-]+@[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(e)) return null;
+  const [local, domain] = e.split("@");
+  if (/\.(png|jpe?g|gif|svg|webp)$/.test(domain)) return null;
+  if (/^\d{3,}[a-z]/.test(local)) return null; // digit-glued prefix, e.g. 98107info@
+  if (/^[0-9a-f]{20,}$/.test(local)) return null; // machine-generated id
+  if (BAD_EMAIL_LOCAL_PARTS.has(local)) return null;
+  if (BAD_EMAIL_DOMAIN_PATTERNS.some((re) => re.test(domain))) return null;
+  // Theme-demo / dev stores on *.myshopify.com are not real merchants. (Real tiny shops on a
+  // myshopify subdomain with a gmail address are exactly our target, so only the clear
+  // demo/dev name patterns are dropped.)
+  if (storeDomain && /^(theme|demo|test|dev)[a-z0-9-]*\.myshopify\.com$/i.test(storeDomain)) return null;
+  return e;
+}
+
 async function qualifyDomain(urlOrDomain, delayMs, rejectedDomains) {
   const domain = urlOrDomain.includes("://") ? domainFromUrl(urlOrDomain) : urlOrDomain;
   if (!domain) return null;
@@ -744,7 +825,7 @@ async function qualifyDomain(urlOrDomain, delayMs, rejectedDomains) {
 
   const hasCrossBorder = detectCrossBorder(homepageHtml);
   const storeName = extractStoreName(homepageHtml, domain);
-  const email = await findContactEmail(domain, delayMs);
+  const email = sanitizeContactEmail(await findContactEmail(domain, delayMs), domain);
 
   console.log(`  [+] ${domain} -- qualified (${productCount} products, cross-border: ${hasCrossBorder}, email: ${email || "none"})`);
 
@@ -765,6 +846,8 @@ async function discoverAndQualify({
   suppressionSet,
   alreadyKnownDomains,
   rejectedDomains,
+  pages = 1,
+  requireEmail = false,
 }) {
   // Seeded with domains already in the cumulative master list (2026-09-10)
   // so a repeat run doesn't waste real HTTP requests re-qualifying a
@@ -801,6 +884,15 @@ async function discoverAndQualify({
       return;
     }
 
+    // --require-email (2026-10-11): a lead with no contact email can't be
+    // emailed, and made up 94 of the 110 leads so far. Don't count it
+    // toward --limit; remember the domain so it isn't re-fetched next run.
+    if (requireEmail && !lead.contactEmail) {
+      console.log(`  [-] ${domain} -- no contact email found, skipped (--require-email)`);
+      rejectedDomains?.set(domain, "no contact email found");
+      return;
+    }
+
     qualified.push(lead);
   }
 
@@ -812,17 +904,21 @@ async function discoverAndQualify({
   if (serperApiKey) {
     for (const query of dorkQueries) {
       if (qualified.length >= limit) break;
-      let urls;
-      try {
-        urls = await searchSerper(query, serperApiKey);
-      } catch (exc) {
-        console.error(`  [warn] Serper search failed for ${JSON.stringify(query)}: ${exc.message}`);
-        continue;
-      }
-      await sleep(delayMs);
-      for (const url of urls) {
+      for (let page = 1; page <= pages; page++) {
         if (qualified.length >= limit) break;
-        await processCandidate(url);
+        let urls;
+        try {
+          urls = await searchSerper(query, serperApiKey, 10, page);
+        } catch (exc) {
+          console.error(`  [warn] Serper search failed for ${JSON.stringify(query)} (page ${page}): ${exc.message}`);
+          break;
+        }
+        await sleep(delayMs);
+        if (urls.length === 0) break; // no more results for this query
+        for (const url of urls) {
+          if (qualified.length >= limit) break;
+          await processCandidate(url);
+        }
       }
     }
   }
@@ -1572,6 +1668,40 @@ async function runSelftest() {
     DEFAULT_DORK_QUERIES.every((q) => q.includes("-site:shopify.com"))
   );
   check(
+    "ALL_DORK_QUERIES is 11 original + every extra niche, all excluding shopify.com, no duplicates",
+    ALL_DORK_QUERIES.length === DEFAULT_DORK_QUERIES.length + EXTRA_NICHES.length &&
+      ALL_DORK_QUERIES.every((q) => q.includes("-site:shopify.com")) &&
+      new Set(ALL_DORK_QUERIES).size === ALL_DORK_QUERIES.length &&
+      EXTRA_NICHES.length >= 60
+  );
+  check(
+    "sanitizeContactEmail drops junk addresses seen in the 2026-10-11 discovery run",
+    sanitizeContactEmail("your@email.com", "a.com") === null &&
+      sanitizeContactEmail("aa4cacd33be28673d7e69be559ce7ad7@o4506196830715904.ingest.us.sentry.io", "a.com") === null &&
+      sanitizeContactEmail("e7d54b729aaf49ea8b2f80dae22860aa@sentry.zipify.com", "a.com") === null &&
+      sanitizeContactEmail("98107info@floodyoga.com", "a.com") === null &&
+      sanitizeContactEmail("payments@bestforminc.com", "a.com") === null &&
+      sanitizeContactEmail("orders@x.com", "x.com") === null &&
+      sanitizeContactEmail("namdh@bsscommerce.com", "a.com") === null &&
+      sanitizeContactEmail("recipient@giftnote.com", "a.com") === null &&
+      sanitizeContactEmail("someone@gmail.com", "theme211-swimwear.myshopify.com") === null &&
+      sanitizeContactEmail(null, "a.com") === null
+  );
+  check(
+    "sanitizeContactEmail repairs URL-encoded nbsp and keeps good addresses",
+    sanitizeContactEmail("%C2%A0info@morebeachwear.com", "morebeachwear.com") === "info@morebeachwear.com" &&
+      sanitizeContactEmail("Info@WearOYA.com", "wearoya.com") === "info@wearoya.com" &&
+      sanitizeContactEmail("itsjojewelry@gmail.com", "jojewelry.store") === "itsjojewelry@gmail.com" &&
+      sanitizeContactEmail("hello@goldenfinchhomeandboutique.com", "goldenfinch-boutique.myshopify.com") === "hello@goldenfinchhomeandboutique.com"
+  );
+  check(
+    "parseArgs reads --pages and --require-email",
+    (() => {
+      const a = parseArgs(["--discover", "--pages", "3", "--require-email"]);
+      return a.pages === 3 && a.requireEmail === true && parseArgs([]).pages === 1 && parseArgs([]).requireEmail === false;
+    })()
+  );
+  check(
     "DEFAULT_DORK_QUERIES includes a couple of the newly-added niches",
     DEFAULT_DORK_QUERIES.some((q) => q.includes("pet accessories")) &&
       DEFAULT_DORK_QUERIES.some((q) => q.includes("swimwear resortwear"))
@@ -1653,6 +1783,10 @@ Options:
                         the interactive confirmation as the only brake). --discover --send
                         together: governs the discovery step; the same number also caps how many
                         get dispatched afterward from the updated pool.
+  --pages N             Discovery: Serper result pages to read per query (default 1; 3 is a good
+                        value once the first page of every query has been exhausted).
+  --require-email       Discovery: only keep stores where a contact email was found; the rest
+                        don't count toward --limit and are cached as rejected.
   --delay SECONDS       Seconds to wait between HTTP requests (default: 2.0).
   --output BASENAME     Writes BASENAME.json and BASENAME.csv (default: qualified_smb_leads).
   --suppression-list P  Opt-out list path (default: suppression_list.json). Manually curated --
@@ -1747,6 +1881,8 @@ function parseArgs(argv) {
     suppressionListPath: DEFAULT_SUPPRESSION_LIST_PATH,
     contactedListPath: DEFAULT_CONTACTED_LIST_PATH,
     rejectedDomainsPath: DEFAULT_REJECTED_DOMAINS_PATH,
+    pages: 1,
+    requireEmail: false,
     suppressEmail: null,
     testEmail: null,
     send: false,
@@ -1767,6 +1903,8 @@ function parseArgs(argv) {
     else if (arg === "--suppression-list") args.suppressionListPath = argv[++i];
     else if (arg === "--contacted-list") args.contactedListPath = argv[++i];
     else if (arg === "--rejected-domains-list") args.rejectedDomainsPath = argv[++i];
+    else if (arg === "--pages") args.pages = Math.max(1, parseInt(argv[++i], 10) || 1);
+    else if (arg === "--require-email") args.requireEmail = true;
     else if (arg === "--suppress") args.suppressEmail = argv[++i];
     else if (arg === "--test-email") args.testEmail = argv[++i];
     else if (arg === "--send") args.send = true;
@@ -1868,10 +2006,23 @@ async function main() {
     const includeFounderBeta = shouldIncludeFounderBeta(sentCountSoFar);
     let refreshedCount = 0;
     let skippedSentCount = 0;
+    let removedEmailCount = 0;
     for (const lead of existingLeads) {
       if (String(lead.status || "").startsWith("Sent")) {
         skippedSentCount++;
         continue; // never rewrite copy that's already gone out to a real person
+      }
+      // Re-validate the stored address (2026-10-11): leads discovered before
+      // sanitizeContactEmail existed may carry junk addresses.
+      if (lead.contactEmail) {
+        const cleaned = sanitizeContactEmail(lead.contactEmail, lead.domain);
+        if (cleaned !== lead.contactEmail) {
+          if (!cleaned) {
+            console.log(`  [clean] ${lead.domain}: dropped unusable email ${JSON.stringify(lead.contactEmail)}`);
+            removedEmailCount++;
+          }
+          lead.contactEmail = cleaned;
+        }
       }
       const installLink = buildInstallLink(lead.domain);
       const { subject, body } = buildPersonalizedDraft({
@@ -1891,7 +2042,7 @@ async function main() {
     await writeFile(`${args.output}.json`, JSON.stringify(existingLeads, null, 2) + "\n", "utf-8");
     await writeFile(`${args.output}.csv`, toCsvRows(existingLeads), "utf-8");
     console.log(
-      `Refreshed ${refreshedCount} draft(s) with the current template and SENDER_PHYSICAL_ADDRESS (${skippedSentCount} already-"Sent" lead(s) left untouched). Founder Beta offer ${
+      `Refreshed ${refreshedCount} draft(s) with the current template and SENDER_PHYSICAL_ADDRESS (${skippedSentCount} already-"Sent" lead(s) left untouched; ${removedEmailCount} unusable email address(es) removed). Founder Beta offer ${
         includeFounderBeta ? "included" : "OMITTED (cap reached)"
       } in the refreshed drafts. Wrote ${args.output}.json and ${args.output}.csv -- review before --send.`
     );
@@ -2029,7 +2180,9 @@ async function main() {
 
   const { qualified, skippedViaRejectedCache } = await discoverAndQualify({
     seedDomains,
-    dorkQueries: DEFAULT_DORK_QUERIES,
+    dorkQueries: ALL_DORK_QUERIES,
+    pages: args.pages,
+    requireEmail: args.requireEmail,
     serperApiKey: args.serperKey,
     braveApiKey: args.braveKey,
     limit: args.limit,
